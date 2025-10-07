@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /mes/
+
+    # ✅ If request starts with /mes/api/, let api/.htaccess handle it
+    RewriteCond %{REQUEST_URI} ^/mes/api(/.*)?$
+    RewriteRule ^ - [L]
+
+    # Don’t rewrite existing files or folders
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ [NC]
+
+    # Send everything else to index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
