@@ -230,72 +230,57 @@ class PlannerModel
         :assembly_section, :assembly_section_no, :assembly_process, :sub_component,
         :process_no, :total_process, :manpower, :cycle_time, :pi_kbn_quantity, :pi_kbn_pieces, :fuel_type
     )";
-
         $inserted = 0;
         $total = count($sections);
         $requiredQty = (int)$item['total_quantity'];
 
-        // Treat VIOS and 32XD as "muffler"
-        // Treat VIOS and 32XD as "muffler"
-        $isMuffler = in_array($item['model'] ?? '', ['VIOS', '32XD']);
-
-        // Treat TOYOTA customer special
-        $isToyota = ($item['customer_name'] ?? '') === 'TOYOTA';
-
-        // Treat HONDA customer special
-        $isHonda = ($item['customer_name'] ?? '') === 'HONDA';
-
-        // Full batches only for others (not muffler, not Toyota, not Honda)
-        $fullBatches = ($isMuffler || $isToyota || $isHonda) ? 1 : intdiv($requiredQty, 30);
-        $remainder   = ($isMuffler || $isToyota || $isHonda) ? 0 : $requiredQty % 30;
-
+        // Loop over sections
         for ($i = 0; $i < $total; $i++) {
             $processManpower = max(1, (int)($manpower[$i] ?? 1));
             $processNo = $i + 1;
 
-            for ($m = 0; $m < $processManpower; $m++) {
+            // Only duplicate if manpower > 1
+            $manpowerLoop = $processManpower > 1 ? $processManpower : 1;
+
+            for ($m = 0; $m < $manpowerLoop; $m++) {
                 $manpowerRef = $processManpower > 1 ? $baseRef . '-' . ($m + 1) : $baseRef;
 
-                for ($b = 0; $b < $fullBatches; $b++) {
-                    $processValue = $isMuffler ? 'stamping' : $process;
-                    $quantityValue = ($item['customer_name'] ?? '') === 'TOYOTA'
-                        ? $requiredQty
-                        : $item['quantity'];
-                    $params = [
-                        ':reference_no'         => $manpowerRef,
-                        ':customer_id'          => $customerId,
-                        ':model'           => $item['model'] ?? '',
-                        ':material_no'          => $item['material_no'],
-                        ':material_description' => $item['material_description'],
-                        ':quantity'             => $quantityValue,
-                        ':supplement_order'     => isset($item['supplement_order']) ? (int)$item['supplement_order'] : null,
-                        ':total_quantity'       => $requiredQty,
-                        ':status'               => $item['status'] ?? '',
-                        ':section'              => $item['section'] ?? '',
-                        ':variant'              => $item['variant'] ?? null,
-                        ':shift'                => $item['shift'] ?? '',
-                        ':lot_no'               => $item['lot_no'] ?? null,
-                        ':process'              => $processValue,
-                        ':created_at'           => $timestamp,
-                        ':updated_at'           => $timestamp,
-                        ':date_needed'          => $item['date_needed'],
-                        ':duplicated'           => 1,
-                        ':assembly_section'     => $sections[$i] ?? null,
-                        ':assembly_section_no'  => $total,
-                        ':assembly_process'     => $processes[$i] ?? null,
-                        ':sub_component'        => $subComponents[$i] ?? null,
-                        ':process_no'           => $processNo,
-                        ':total_process'        => $item['assemblyTotalprocess'],
-                        ':manpower'             => $processManpower,
-                        ':cycle_time'           => $assemblyProcessTime[$i] ?? null,
-                        ':pi_kbn_quantity'      => $item['pi_kbn_quantity'] ?? 0,
-                        ':pi_kbn_pieces'        => $item['pi_kbn_pieces'] ?? 0,
-                        ':fuel_type'            => $item['fuel_type'] ?? null
-                    ];
+                $quantityValue = $item['quantity'];
 
-                    if ($this->db->Insert($sql, $params) !== false) {
-                        $inserted++;
-                    }
+                $params = [
+                    ':reference_no'         => $manpowerRef,
+                    ':customer_id'          => $customerId,
+                    ':model'                => $item['model'] ?? '',
+                    ':material_no'          => $item['material_no'],
+                    ':material_description' => $item['material_description'],
+                    ':quantity'             => $quantityValue,
+                    ':supplement_order'     => isset($item['supplement_order']) ? (int)$item['supplement_order'] : null,
+                    ':total_quantity'       => $requiredQty,
+                    ':status'               => 'pending',
+                    ':section'              => 'DELIVERY',
+                    ':variant'              => $item['variant'] ?? null,
+                    ':shift'                => $item['shift'] ?? '',
+                    ':lot_no'               => $item['lot_no'] ?? null,
+                    ':process'              => $process ?? null,
+                    ':created_at'           => $timestamp,
+                    ':updated_at'           => $timestamp,
+                    ':date_needed'          => $item['date_needed'],
+                    ':duplicated'           => $processManpower > 1 ? 1 : 0,
+                    ':assembly_section'     => $sections[$i] ?? null,
+                    ':assembly_section_no'  => $total,
+                    ':assembly_process'     => $processes[$i] ?? null,
+                    ':sub_component'        => $subComponents[$i] ?? null,
+                    ':process_no'           => $processNo,
+                    ':total_process'        => $item['assemblyTotalprocess'],
+                    ':manpower'             => $processManpower,
+                    ':cycle_time'           => $assemblyProcessTime[$i] ?? null,
+                    ':pi_kbn_quantity'      => $item['pi_kbn_quantity'] ?? 0,
+                    ':pi_kbn_pieces'        => $item['pi_kbn_pieces'] ?? 0,
+                    ':fuel_type'            => $item['fuel_type'] ?? null
+                ];
+
+                if ($this->db->Insert($sql, $params) !== false) {
+                    $inserted++;
                 }
             }
         }
@@ -400,7 +385,7 @@ class PlannerModel
         $sql = "SELECT * FROM components_inventory WHERE model = :customerName ORDER BY id ASC";
         return $this->db->Select($sql, [':customerName' => $customerName]);
     }
-    public function submitForm_allcustomer() {}
+
     public function recheckComponentInventory(array $input): array
     {
         $results = [];

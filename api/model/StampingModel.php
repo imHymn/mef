@@ -112,13 +112,13 @@ class StampingModel
     {
         $hasManpower = isset($data['manpower']) && $data['manpower'] !== null;
 
-        $sql = "UPDATE `stamping` SET person_incharge = :name, time_in = :timein, status = :status, remarks = :remarks";
+        $sql = "UPDATE `stamping` SET person_incharge = :name, time_in = :timein, status = :status, remarks = :remarks WHERE id = :id AND duplicated = :duplicated";
 
-        if ($hasManpower) {
-            $sql .= " WHERE reference_no = :reference_no AND stage = :stage AND pair = :pair AND duplicated = :duplicated";
-        } else {
-            $sql .= " WHERE id = :id AND duplicated = :duplicated";
-        }
+        // if ($hasManpower) {
+        //     $sql .= " WHERE reference_no = :reference_no AND stage = :stage AND pair = :pair AND duplicated = :duplicated";
+        // } else {
+        //     $sql .= " WHERE id = :id AND duplicated = :duplicated";
+        // }
 
         $params = [
             ':name'     => $data['name'],
@@ -126,17 +126,19 @@ class StampingModel
             ':status'   => 'ongoing',
             ':remarks'  => $data['remarks'] === '' ? null : $data['remarks'],
             ':duplicated'     => $data['duplicated'],
+            ':id' => $data['id'],
+
         ];
 
-        if ($hasManpower) {
-            $params[':reference_no'] = $data['reference_no'];
-            $params[':stage']        = $data['stage'];
-            $params[':pair']         = $data['pair'];
-            $params[':duplicated']         = $data['duplicated'];
-        } else {
-            $params[':id'] = $data['id'];
-            $params[':duplicated']         = $data['duplicated'];
-        }
+        // if ($hasManpower) {
+        //     $params[':reference_no'] = $data['reference_no'];
+        //     $params[':stage']        = $data['stage'];
+        //     $params[':pair']         = $data['pair'];
+        //     $params[':duplicated']         = $data['duplicated'];
+        // } else {
+        //     $params[':id'] = $data['id'];
+        //     $params[':duplicated']         = $data['duplicated'];
+        // }
 
         return $this->db->Update($sql, $params);
     }
@@ -146,7 +148,7 @@ class StampingModel
         $inputQty = $data['inputQuantity'];
 
         // If manpower is present, update 2 rows with same quantity
-        if (!empty($data['manpower'])) {
+        if (!empty($data['manpower']) && !empty($data['pair'])) {
             $pendingQuantity = ($data['pending_quantity'] > 0)
                 ? $data['pending_quantity'] - $inputQty
                 : $data['total_quantity'] - $inputQty;
@@ -209,7 +211,7 @@ class StampingModel
             return $this->db->Update($sql, $params);
         }
     }
-    public function getStampingByReferenceStagePair(string $referenceNo, string $stage, string $pair, string $duplicated): array
+    public function getStampingByReferenceStagePair(string $referenceNo, string $stage, ?string $pair, string $duplicated): array
     {
         $sql = "SELECT * FROM stamping 
             WHERE reference_no = :reference_no 
@@ -307,10 +309,12 @@ class StampingModel
     public function areAllStagesDone(string $materialNo, string $componentName, int $processQty, int $totalQty, int $batch): bool
     {
         for ($stage = 1; $stage <= $processQty; $stage++) {
-            $sql = "SELECT SUM(quantity) as total_stage_quantity
-                    FROM stamping
-                    WHERE material_no = :material_no AND components_name = :component_name 
-                    AND stage = :stage AND batch = :batch";
+            $sql = "SELECT SUM(pending_quantity) as pending_stage_qty
+                FROM stamping
+                WHERE material_no = :material_no
+                  AND components_name = :component_name
+                  AND stage = :stage
+                  AND batch = :batch";
 
             $result = $this->db->SelectOne($sql, [
                 ':material_no' => $materialNo,
@@ -319,12 +323,17 @@ class StampingModel
                 ':batch' => $batch
             ]);
 
-            if ((int)($result['total_stage_quantity'] ?? 0) < $totalQty) {
+            $pendingQty = (int)($result['pending_stage_qty'] ?? 0);
+
+            // If any stage still has pending_quantity > 0, return false
+            if ($pendingQty > 0) {
                 return false;
             }
         }
+
         return true;
     }
+
     public function getDateNeededByReference($referenceNo)
     {
         $sql = "SELECT date_needed 

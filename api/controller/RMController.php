@@ -129,11 +129,8 @@ class RMController
                                         'section'      => $entry['section'],
                                         'cycle_time'   => $data['cycle'] ?? 0,
                                         'machine_name' => $data['machine'] ?? null,
+                                        'manpower'     => $data['manpower'] ?? 1   // default to 1 if missing
                                     ];
-
-                                    if (isset($data['manpower'])) {
-                                        $flattenedEntry['manpower'] = $data['manpower'];
-                                    }
 
                                     $flattenedStages[] = $flattenedEntry;
                                 } else {
@@ -141,7 +138,8 @@ class RMController
                                         'stage_name'   => $stageName,
                                         'section'      => $entry['section'],
                                         'cycle_time'   => is_numeric($data) ? floatval($data) : 0,
-                                        'machine_name' => null
+                                        'machine_name' => null,
+                                        'manpower'     => 1   // default to 1 for numeric stages
                                     ];
                                 }
                             }

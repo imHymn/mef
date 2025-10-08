@@ -238,15 +238,15 @@
                   .then(response => {
                     if (response.success) {
                       showAlert('success', 'Pulled out!', response.message || 'Item marked as pulled out.')
-                        .then(() => getData()); // reload full data after alert
+                        .then(() => {
+                          window.location.reload(); // reload the page after alert closes
+                        });
                     } else {
                       showAlert('error', 'Error', response.message || 'Failed to pull out item.');
                     }
+
                   })
-                  .catch(err => {
-                    console.error('Pull out error:', err);
-                    showAlert('error', 'Error', 'An unexpected error occurred.');
-                  });
+
 
               }
             });

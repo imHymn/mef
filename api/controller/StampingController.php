@@ -169,7 +169,8 @@ class StampingController
         $result = $this->stampingModel->timeinOperator($input);
         echo json_encode([
             'status' => 'success',
-            'message' => 'Stage updated successfully'
+            'message' => 'Stage updated successfully',
+            'result' => $result
         ]);
     }
     public function timeoutOperator()
@@ -183,9 +184,9 @@ class StampingController
             $model = $input['model'] ?? null;
             $cycle_time = $input['cycle_time'] ?? null;
             $reference_no = $input['reference_no'] ?? null;
+            $responseData = [];
 
-            if (!empty($input['manpower'])) {
-                // Get both entries for the same pair
+            if (!empty($input['manpower']) && !empty($input['pair'])) {
                 $rows = $this->stampingModel->getStampingByReferenceStagePair(
                     $input['reference_no'],
                     $input['stage'],
@@ -197,8 +198,8 @@ class StampingController
                     throw new Exception("Expected 2 stamping records for pair, got " . count($rows));
                 }
 
-                $row = $rows[0]; // use first for later reference
-                $rowIds = array_column($rows, 'id'); // optionally collect both IDs
+                $row = $rows[0];
+                $rowIds = array_column($rows, 'id');
             } else {
                 $row = $this->stampingModel->getStampingById($input['id']);
                 if (!$row) {
@@ -206,21 +207,16 @@ class StampingController
                 }
             }
 
-            if (!empty($input['manpower'])) {
-                $stats = $this->stampingModel->getQuantityStats($row['reference_no'], $row['stage'], $row['pair']);
-            } else {
-                $stats = $this->stampingModel->getQuantityStats($row['reference_no']);
-            }
+            $stats = !empty($input['manpower']) && !empty($input['pair'])
+                ? $this->stampingModel->getQuantityStats($row['reference_no'], $row['stage'], $row['pair'])
+                : $this->stampingModel->getQuantityStats($row['reference_no']);
 
             $totalDone = (int)($stats['total_quantity_done'] ?? 0);
             $maxTotal = (int)($stats['max_total_quantity'] ?? 0);
-
-            if (!empty($input['manpower'])) {
-                $maxTotal *= 2;
-            }
+            if (!empty($input['manpower']) && !empty($input['pair'])) $maxTotal *= 2;
 
             if ($totalDone < $maxTotal) {
-                if (!empty($input['manpower'])) {
+                if (!empty($input['manpower']) && !empty($input['pair'])) {
                     $pairRows = $this->stampingModel->getPairRows($row['reference_no'], $row['stage'], $row['pair'], $row['duplicated']);
                     foreach ($pairRows as $r) {
                         $this->stampingModel->duplicateIfNotDone($r, $input['inputQuantity']);
@@ -228,87 +224,101 @@ class StampingController
                 } else {
                     $this->stampingModel->duplicateIfNotDone($row, $input['inputQuantity']);
                 }
+
+                $responseData = [
+                    'action' => 'duplicated',
+                    'row_id' => $row['id'],
+                    'inputQuantity' => $input['inputQuantity'],
+                    'totalDone' => $totalDone,
+                    'maxTotal' => $maxTotal
+                ];
             } else {
                 $allDone = $this->stampingModel->areAllStagesDone(
                     $row['material_no'],
                     $row['components_name'],
                     (int)$row['process_quantity'],
                     (int)$row['total_quantity'],
-                    (int)$row['batch']
+                    (int)$row['batch'],
+                    $row['stage'],
                 );
 
                 if ($allDone) {
-                    $dateNeeded = $this->stampingModel->getDateNeededByReference($input['customer_id']);
-                    $qcPayload = [
-                        'model' => $model,
-                        'variant' => $variant ?? null,
-                        'shift' => $null ?? null,
-                        'lot_no' => $null ?? null,
-                        'date_needed' => $dateNeeded,
-                        'reference_no' => $input['customer_id'],
-                        'customer_id' => $input['customer_id'],
-                        'material_no' =>  $row['material_no'],
-                        'material_description' =>  $row['components_name'],
-                        'total_quantity' => $row['total_quantity'],
-                        'done_quantity' => $row['total_quantity'],
-                        'created_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                    $rowsToProcess = !empty($input['manpower']) && !empty($input['pair']) ? $rows : [$row];
 
-                        'assembly_section' => 'STAMPING',
-                        'cycle_time' => $cycle_time,
-                        'pi_kbn_quantity' => null,
-                        'pi_kbn_pieces' => null,
-                        'fuel_type' => $null ?? null
+                    foreach ($rowsToProcess as $r) {
+                        $dateNeeded = $this->stampingModel->getDateNeededByReference($input['customer_id']);
+
+                        $qcPayload = [
+                            'model' => $model,
+                            'variant' => $variant ?? null,
+                            'shift' => $null ?? null,
+                            'lot_no' => $null ?? null,
+                            'date_needed' => $dateNeeded,
+                            'reference_no' => $input['customer_id'],
+                            'customer_id' => $input['customer_id'],
+                            'material_no' =>  $r['material_no'],
+                            'material_description' =>  $r['components_name'],
+                            'total_quantity' => $r['total_quantity'],
+                            'done_quantity' => $r['total_quantity'],
+                            'created_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                            'assembly_section' => 'STAMPING',
+                            'cycle_time' => $cycle_time,
+                            'pi_kbn_quantity' => null,
+                            'pi_kbn_pieces' => null,
+                            'fuel_type' => $null ?? null
+                        ];
+
+                        $this->stampingModel->moveToQCList($qcPayload);
+                        $this->stampingModel->updateIssueRawMaterial($r['material_no'], $r['components_name'], $r['total_quantity']);
+                        $this->stampingModel->updateComponentsRMStock($r['material_no'], $r['components_name'], $r['total_quantity']);
+                    }
+
+                    $responseData = [
+                        'action' => 'moved_to_qc',
+                        'rows' => array_map(fn($r) => [
+                            'material_no' => $r['material_no'],
+                            'material_description' => $r['components_name'],
+                            'total_quantity' => $r['total_quantity'],
+                            'date_needed' => $dateNeeded
+                        ], $rowsToProcess)
                     ];
-                    $this->stampingModel->moveToQCList($qcPayload);
-
-                    $this->stampingModel->updateIssueRawMaterial($row['material_no'], $row['components_name'], $row['total_quantity']);
-                    // $specialModels = ["MILLIARD", "APS", "KOMYO"];
-                    // $modelKey = strtoupper(preg_replace('/[0-9]/', '', $model ?? ''));
-
-
-                    $this->stampingModel->updateComponentsRMStock(
-                        $row['material_no'],
-                        $row['components_name'],
-                        $row['total_quantity']
-                    );
-
-
-                    // FOR MILLIARD APS AND KOMYO MODEL CONDITION
-                    // $warehouseData = [
-                    //     'reference_no'         => $input['customer_id'],
-                    //     'material_no'          => $row['material_no'],
-                    //     'material_description' => $row['components_name'],
-                    //     'model'                => $input['model'],
-                    //     'total_good'           => $row['total_quantity'],
-                    //     'total_quantity'       => $row['total_quantity'],
-                    //     'shift'                => $input['shift'] ?? null,
-                    //     'lot_no'               => $input['lot_no'] ?? null,
-                    //     'date_needed'          => $dateNeeded,
-                    //     'created_at'           => date('Y-m-d H:i:s'),
-                    //     'new_section'          => 'warehouse',
-                    //     'new_status'           => 'done',
-                    // ];
-
-                    // if (in_array(strtoupper($input['model']), ['MILLIARD', 'APS', 'KOMYO'])) {
-                    //     $model->moveToFGWarehouse($warehouseData);
-                    // }
                 }
             }
 
-            // Commit transaction if all queries succeed
             $this->db->commit();
 
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Stamping timeout processed',
-
+                'data' => $responseData
             ]);
         } catch (Exception $e) {
-            // Rollback transaction on any failure
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
+
+
+
+    // FOR MILLIARD APS AND KOMYO MODEL CONDITION
+    // $warehouseData = [
+    //     'reference_no'         => $input['customer_id'],
+    //     'material_no'          => $row['material_no'],
+    //     'material_description' => $row['components_name'],
+    //     'model'                => $input['model'],
+    //     'total_good'           => $row['total_quantity'],
+    //     'total_quantity'       => $row['total_quantity'],
+    //     'shift'                => $input['shift'] ?? null,
+    //     'lot_no'               => $input['lot_no'] ?? null,
+    //     'date_needed'          => $dateNeeded,
+    //     'created_at'           => date('Y-m-d H:i:s'),
+    //     'new_section'          => 'warehouse',
+    //     'new_status'           => 'done',
+    // ];
+
+    // if (in_array(strtoupper($input['model']), ['MILLIARD', 'APS', 'KOMYO'])) {
+    //     $model->moveToFGWarehouse($warehouseData);
+    // }
 }
