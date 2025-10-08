@@ -237,16 +237,17 @@
                   .then(res => res.json())
                   .then(response => {
                     if (response.success) {
-                      Swal.fire('Pulled out!', response.message || 'Item marked as pulled out.', 'success');
-                      getData(); // reload full data
+                      showAlert('success', 'Pulled out!', response.message || 'Item marked as pulled out.')
+                        .then(() => getData()); // reload full data after alert
                     } else {
-                      Swal.fire('Error', response.message || 'Failed to pull out item.', 'error');
+                      showAlert('error', 'Error', response.message || 'Failed to pull out item.');
                     }
                   })
                   .catch(err => {
                     console.error('Pull out error:', err);
-                    Swal.fire('Error', 'An unexpected error occurred.', 'error');
+                    showAlert('error', 'Error', 'An unexpected error occurred.');
                   });
+
               }
             });
           });

@@ -131,13 +131,10 @@
             ])
             .then(([assemblyRes, finishingRes]) => {
                 if (!assemblyRes.success && !finishingRes.success) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to load tasks from both assembly and finishing.'
-                    });
+                    showAlert('error', 'Error', 'Failed to load tasks from both assembly and finishing.');
                     return;
                 }
+
 
                 let assemblyItems = (assemblyRes.items || [])
                     .filter(item => item.id && (item.assembly_process || item.sub_component))
@@ -202,12 +199,8 @@
                 });
             })
             .catch(err => {
-                console.error(err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Network Error',
-                    text: 'Please try again.'
-                });
+                showAlert('error', 'Network Error', 'Please try again.');
+
             });
     }
 
@@ -232,27 +225,17 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Assigned!',
-                        text: `Task #${id} has been successfully assigned to ${full_name}.`
-                    }).then(() => window.location.reload());
+                    showAlert('success', 'Assigned!', `Task #${id} has been successfully assigned to ${full_name}.`);
+                    window.location.reload();
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Assignment Failed',
-                        text: data.message || `Failed to assign task #${id}.`
-                    });
+                    showAlert('error', 'Assignment Failed', data.message || `Failed to assign task #${id}.`);
                 }
             })
             .catch(err => {
                 console.error('Error assigning:', err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An unexpected error occurred.'
-                });
+                showAlert('error', 'Error', 'An unexpected error occurred.');
             });
+
     }
     // 🔹 Enable drag & drop per table
     function enableDragAndDrop() {

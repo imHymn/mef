@@ -336,38 +336,20 @@
           body: JSON.stringify(payload)
         })
         .then(res => res.json())
-        .then(data => {
+        .then(async data => {
           if (data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: data.message || 'Updated!',
-              customClass: {
-                popup: 'swal-sm'
-              }
-            }).then(() => bootstrap.Modal.getInstance(modalEl).hide());
+            await showAlert('success', 'Success', data.message || 'Updated!');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
           } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: data.message || 'Update failed',
-              customClass: {
-                popup: 'swal-sm'
-              }
-            });
+            await showAlert('error', 'Error', data.message || 'Update failed');
           }
         })
-        .catch(err => {
+        .catch(async err => {
           console.error(err);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Unexpected error',
-            customClass: {
-              popup: 'swal-sm'
-            }
-          });
+          await showAlert('error', 'Error', 'Unexpected error');
         });
+
     });
 
   });

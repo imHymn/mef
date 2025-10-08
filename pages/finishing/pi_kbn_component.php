@@ -338,14 +338,10 @@
                     );
 
                     if (!mappedRows.length) {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'No Pending Tasks',
-                            text: `There are no pending rows assigned to ${full_name}.`,
-                            confirmButtonText: 'OK'
-                        });
+                        showAlert('info', 'No Pending Tasks', `There are no pending rows assigned to ${full_name}.`);
                         return;
                     }
+
 
                     // Prioritize by null time_in or time_out + by_order
                     mappedRows.sort((a, b) => {
@@ -436,12 +432,16 @@
                             .then(res => res.json())
                             .then(response => {
                                 if (response.status === 'success') {
-                                    Swal.fire('Success', response.message || `Time-In recorded.`, 'success');
+                                    showAlert('success', 'Success', response.message || 'Time-In recorded.');
                                 } else {
-                                    Swal.fire('Error', response.message || 'Something went wrong.', 'error');
+                                    showAlert('error', 'Error', response.message || 'Something went wrong.');
                                 }
                             })
-                            .catch(err => console.error(err));
+                            .catch(err => {
+                                console.error(err);
+                                showAlert('error', 'Error', 'Something went wrong.');
+                            });
+
                     }
                 });
             }
@@ -472,21 +472,14 @@
 
                 if (isSpecialSection) {
                     if (!hasOngoing && !hasAnyDone && !allDone) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: `Cannot Time-In`,
-                            text: `The previous process didn't meet its requirements to proceed.`,
-                        });
+                        showAlert('warning', 'Cannot Time-In', "The previous process didn't meet its requirements to proceed.");
                         return;
                     }
                 } else if (!hasOngoing && !allDone && !prevStageCompleted && !hasAnyDone) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: `Cannot Time-In`,
-                        text: `The previous process didn't meet its requirements to proceed.`,
-                    });
+                    showAlert('warning', 'Cannot Time-In', "The previous process didn't meet its requirements to proceed.");
                     return;
                 }
+
             }
 
             proceedToAPI();
@@ -577,13 +570,10 @@
                 const inputQuantity = parseInt(document.getElementById('timeoutQuantity').value, 10);
 
                 if (!inputQuantity || inputQuantity <= 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Invalid Quantity',
-                        text: 'Please enter a valid, positive quantity greater than 0.'
-                    });
+                    showAlert('warning', 'Invalid Quantity', 'Please enter a valid, positive quantity greater than 0.');
                     return;
                 }
+
 
                 const referenceNo = selectedRowData.reference_no;
                 let totalQuantity = parseInt(selectedRowData.total_quantity, 10) || 0;
@@ -600,32 +590,24 @@
                 }
 
                 if (inputQuantity > pendingQuantity) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Pending Quantity Limit Exceeded',
-                        html: `
-            <p>You entered <strong>${inputQuantity}</strong> units.</p>
-            <p>But only <strong>${pendingQuantity}</strong> units are pending for processing.</p>
-            <p>Please adjust your quantity accordingly.</p>
-        `
-                    });
+                    showAlert(
+                        'error',
+                        'Pending Quantity Limit Exceeded',
+                        `You entered ${inputQuantity} units.\nBut only ${pendingQuantity} units are pending for processing.\nPlease adjust your quantity accordingly.`
+                    );
                     return;
                 }
 
                 if (sumQuantity + inputQuantity > totalQuantity) {
                     const remaining = totalQuantity - sumQuantity;
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Total Quantity Limit Exceeded',
-                        html: `
-            <p>Reference #: <strong>${referenceNo}</strong></p>
-            <p>Already processed: <strong>${sumQuantity}</strong> / ${totalQuantity}</p>
-            <p>Your input of <strong>${inputQuantity}</strong> would exceed the total allowed.</p>
-            <p>You can only process up to <strong>${remaining}</strong> more units.</p>
-        `
-                    });
+                    showAlert(
+                        'error',
+                        'Total Quantity Limit Exceeded',
+                        `Reference #: ${referenceNo}\nAlready processed: ${sumQuantity} / ${totalQuantity}\nYour input of ${inputQuantity} would exceed the total allowed.\nYou can only process up to ${remaining} more units.`
+                    );
                     return;
                 }
+
 
                 // Validate against previous stage done quantity
                 const currentStage = parseInt(selectedRowData.stage || 0);
@@ -642,17 +624,10 @@
                         .reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
 
                     if (inputQuantity > doneQtyFromPrevStage) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Exceeded Previous Process Output',
-                            html: `
-                <p>You entered <strong>${inputQuantity}</strong> units for Time-Out.</p>
-                <p>But only <strong>${doneQtyFromPrevStage}</strong> units were completed in the previous process.</p>
-                <p>Please enter a quantity within that limit.</p>
-            `
-                        });
+                        showAlert('error', 'Exceeded Previous Process Output', `You entered ${inputQuantity} units for Time-Out.\nBut only ${doneQtyFromPrevStage} units were completed in the previous process.\nPlease enter a quantity within that limit.`);
                         return;
                     }
+
                 }
 
                 // ✅ Set the inputQuantity
@@ -699,7 +674,7 @@
                     customer_id
                 };
                 console.log(postData)
-                fetch('api/stamping/timeoutOperator.php', {
+                fetch('api/stamping/timeoutOperator', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -709,14 +684,14 @@
                     .then(res => res.json())
                     .then(response => {
                         if (response.status === 'success') {
-                            Swal.fire('Success', response.message || `Time-Out recorded.`, 'success');
+                            showAlert('success', 'Success', response.message || 'Time-Out recorded.');
                         } else {
-                            Swal.fire('Error', response.message || 'Something went wrong.', 'error');
+                            showAlert('error', 'Error', response.message || 'Something went wrong.');
                         }
                     })
                     .catch(err => {
                         console.error(err);
-                        Swal.fire('Error', 'Network error occurred.', 'error');
+                        showAlert('error', 'Error', 'Network error occurred.');
                     });
 
                 console.log('Time-Out Selected Row:', selectedRowData);
@@ -750,7 +725,7 @@
         }
 
         function viewStageStatus(materialNo, componentName, batch) {
-            fetch('api/stamping/getComponentStatus.php', {
+            fetch('api/stamping/getComponentStatus', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -792,12 +767,12 @@
                             showConfirmButton: true
                         });
                     } else {
-                        Swal.fire('Error', data.message || 'Could not fetch stage data.', 'error');
+                        showAlert('error', 'Error', data.message || 'Could not fetch stage data.');
                     }
                 })
                 .catch(err => {
                     console.error('Fetch error:', err);
-                    Swal.fire('Error', 'Something went wrong.', 'error');
+                    showAlert('error', 'Error', 'Something went wrong.');
                 });
 
             function renderStageBox(stage) {

@@ -110,6 +110,7 @@ $router->post('/rm/deleteIssued', 'RMController@deleteIssued');
 
 
 // STAMPING
+$router->get('/stamping/getLatestReferenceNo', 'StampingController@getLatestReferenceNo');
 $router->get('/stamping/getMachines', 'StampingController@getMachines');
 $router->get('/stamping/getData_toassign', 'StampingController@getData_toassign');
 $router->get('/stamping/getAllData_assigned', 'StampingController@getAllData_assigned');

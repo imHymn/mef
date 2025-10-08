@@ -51,13 +51,10 @@
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: data.message || 'Failed to load delivery form items.'
-          });
+          showAlert('error', 'Error', data.message || 'Failed to load delivery form items.');
           return;
         }
+
 
         let items = (data.items || [])
           .filter(item => item.id && item.material_no && item.material_description)
@@ -131,11 +128,8 @@
       })
       .catch(err => {
         console.error(err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Network Error',
-          text: 'Please try again.'
-        });
+        showAlert('error', 'Network Error', 'Please try again.');
+
       });
   }
 
@@ -157,30 +151,22 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Assigned!',
-            text: `Task #${id} has been successfully assigned to ${full_name}.`,
-            showConfirmButton: true
-          }).then(() => {
-            window.location.reload();
-          });
+          showAlert('success', 'Assigned!', `Task #${id} has been successfully assigned to ${full_name}.`);
+          // reload after a short delay to allow the alert to show
+          setTimeout(() => window.location.reload(), 2100);
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Assignment Failed',
-            text: data.message || `Failed to assign task #${id}.`
-          });
+          showAlert(
+            'error',
+            'Assignment Failed',
+            data.message || `Failed to assign task #${id}.`
+          );
         }
       })
       .catch(err => {
         console.error('Error assigning:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'An unexpected error occurred.'
-        });
+        showAlert('error', 'Error', 'An unexpected error occurred.');
       });
+
   }
 
 

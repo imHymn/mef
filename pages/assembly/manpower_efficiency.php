@@ -181,27 +181,39 @@
               const text = await res.text();
               try {
                 const json = JSON.parse(text);
+
                 if (json.success) {
-                  Swal.fire({
-                    title: 'Reset!',
-                    text: `Data has been reset and quantity updated.`,
-                    icon: 'success',
-                    timer: 1500,
-                    showConfirmButton: false
-                  });
+                  showAlert(
+                    'success',
+                    'Reset Successful!',
+                    `Data has been reset and quantity updated for Reference No: ${referenceNo}.`
+                  );
                 } else {
-                  Swal.fire('Error', json.message || 'Authorization failed.', 'error');
+                  showAlert(
+                    'error',
+                    'Authorization Failed',
+                    json.message || 'Invalid supervisor code or missing permission.'
+                  );
                 }
               } catch (err) {
                 console.error('❌ JSON parse error:', err);
-                Swal.fire('Error', 'Invalid JSON response from server.', 'error');
+                showAlert(
+                  'error',
+                  'Invalid Server Response',
+                  'Received invalid JSON response from the server.'
+                );
               }
             })
             .catch(err => {
-              Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
               console.error(err);
+              showAlert(
+                'error',
+                'Request Failed',
+                'Something went wrong. Please check your network or try again later.'
+              );
             });
         }
+
       });
     }
 

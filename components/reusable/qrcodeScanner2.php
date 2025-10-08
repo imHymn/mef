@@ -26,7 +26,7 @@
 
   // Fetch accounts from API
   async function fetchAccounts() {
-    const res = await fetch('api/accounts/getAccounts.php');
+    const res = await fetch('api/accounts/getAccounts');
     return res.ok ? res.json() : [];
   }
 
@@ -134,23 +134,24 @@
             const full_name = (decodedText.match(/Name:\s*(.+)/)?.[1] || '').trim();
 
             if (!user_id || !full_name) {
-              await Swal.fire('Error', 'Could not extract user ID or name.', 'error');
+              await showAlert('error', 'Error', 'Could not extract user ID or name.');
               resultContainer.textContent = 'Waiting for QR scan…';
               qrReader.resume();
               return;
             }
 
             const allAccounts = await fetchAccounts();
-            const exactMatch = allAccounts.find(acc => acc.user_id === user_id && acc.name.toUpperCase() === full_name.toUpperCase());
+            const exactMatch = allAccounts.find(
+              acc => acc.user_id === user_id && acc.name.toUpperCase() === full_name.toUpperCase()
+            );
 
             if (!exactMatch) {
-              await Swal.fire('Error', 'User does not exist in the system.', 'error');
+              await showAlert('error', 'Error', 'User does not exist in the system.');
               resultContainer.textContent = 'Waiting for QR scan…';
               qrReader.resume();
               return;
             }
 
-            // Apply the same account rules as your reusable modal
             const authorized = passesAccountRules(exactMatch, {
               section,
               role,
@@ -158,12 +159,11 @@
             });
 
             if (!authorized) {
-              await Swal.fire('Access Denied', 'User is not authorized for this section/location.', 'error');
+              await showAlert('error', 'Access Denied', 'User is not authorized for this section/location.');
               resultContainer.textContent = 'Waiting for QR scan…';
               qrReader.resume();
               return;
             }
-
             onSuccess?.({
               user_id: exactMatch.user_id,
               full_name: exactMatch.name,

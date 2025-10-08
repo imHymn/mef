@@ -139,9 +139,10 @@
       let locations = Array.from(form.querySelectorAll('input[name="production_location[]"]:checked')).map(cb => cb.value);
 
       if (!id || productions.length === 0) {
-        Swal.fire('Missing Info', 'Please complete all fields.', 'warning');
+        showAlert('warning', 'Missing Info', 'Please complete all fields.');
         return;
       }
+
 
       // Add FINISHING / PAINTING if production selected
       const normalized = productions.map(p => p.toLowerCase());
@@ -162,19 +163,18 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            Swal.fire('Updated', data.message || 'Production info updated.', 'success')
-              .then(() => {
-                updateModal.hide();
-                if (typeof loadAccounts === 'function') loadAccounts();
-              });
+            showAlert('success', 'Updated', data.message || 'Production info updated.');
+            updateModal.hide();
+            if (typeof loadAccounts === 'function') loadAccounts();
           } else {
-            Swal.fire('Error', data.message || 'Update failed.', 'error');
+            showAlert('error', 'Error', data.message || 'Update failed.');
           }
         })
         .catch(err => {
           console.error(err);
-          Swal.fire('Error', 'Unexpected error occurred.', 'error');
+          showAlert('error', 'Error', 'Unexpected error occurred.');
         });
+
     });
 
     // Bind update buttons in table

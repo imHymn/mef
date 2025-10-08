@@ -28,16 +28,19 @@
             <h6 class="card-title mb-0">Components Inventory</h6>
             <small id="last-updated" class="text-muted" style="font-size:13px;"></small>
           </div>
-          <div class="row mb-3 col-md-3">
 
-
+          <div class="d-flex align-items-center justify-content-between w-100 mb-2">
             <input
               type="text"
               id="filter-input"
-              class="form-control"
+              class="form-control form-control-sm me-2"
+              style="max-width: 300px;"
               placeholder="Type to filter..." />
 
           </div>
+
+
+
           <table class="custom-hover table" style="table-layout: fixed; width: 100%;">
             <thead>
               <tr>
@@ -47,6 +50,7 @@
                 <th style="width: 5%; text-align: center;">Quantity <span class="sort-icon"></span></th>
                 <th style="width: 7%; text-align: center;">Raw Material Qty <span class="sort-icon"></span></th>
                 <th style="width: 5%; text-align: center;">Stock Status <span class="sort-icon"></span></th>
+                <th style="width: 5%; text-align: center;">Issue<span class="sort-icon"></span></th>
               </tr>
             </thead>
             <tbody id="data-body"></tbody>
@@ -127,12 +131,9 @@
         })
         .catch(error => {
           console.error('Error fetching component data:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load inventory data.'
-          });
+          showAlert('error', 'Error', 'Failed to load inventory data.');
         });
+
     }
 
     function renderTable(data) {
@@ -192,14 +193,20 @@
 
         const row = document.createElement('tr');
         row.innerHTML = `
-      <td style="text-align: center;">${highlightText(item.material_no, currentFilterQuery)}</td>
-      <td style="text-align: center;white-space: normal; word-wrap: break-word;">${highlightText(item.components_name, currentFilterQuery)}</td>
-      <td style="text-align: center;">${highlightText(item.usage_type, currentFilterQuery)}</td>
-      <td style="text-align: center;">${highlightText(item.actual_inventory, currentFilterQuery)}</td>
-      <td style="text-align: center;">${highlightText(item.rm_stocks, currentFilterQuery)} ${item.rm_stocks ? '<br/>(Ongoing)' : ''}</td>
-      <td style="text-align: center;">${item.stockText}</td>
-    `;
+  <td style="text-align: center;">${highlightText(item.material_no, currentFilterQuery)}</td>
+  <td style="text-align: center;white-space: normal; word-wrap: break-word;">${highlightText(item.components_name, currentFilterQuery)}</td>
+  <td style="text-align: center;">${highlightText(item.usage_type, currentFilterQuery)}</td>
+  <td style="text-align: center;">${highlightText(item.actual_inventory, currentFilterQuery)}</td>
+  <td style="text-align: center;">${highlightText(item.rm_stocks, currentFilterQuery)} ${item.rm_stocks ? '<br/>(Ongoing)' : ''}</td>
+  <td style="text-align: center;">${item.stockText}</td>
+  <td style="text-align: center;">
+    <button class="btn btn-sm btn-primary issueBtn">Issue</button>
+  </td>
+`;
         dataBody.appendChild(row);
+        row.querySelector(".issueBtn").addEventListener("click", function() {
+          getRowData(item);
+        });
       }
 
       const now = new Date();
@@ -228,6 +235,88 @@
 
       paginator.setData(filtered);
     });
+
+
+    async function getRowData(data) {
+      let reference_no = null;
+      fetch('api/stamping/getLatestReferenceNo')
+        .then(response => response.json())
+        .then(data => {
+          reference_no = data;
+        })
+      const {
+        value: customQty
+      } = await Swal.fire({
+        title: `Issue Quantity`,
+        html: `
+      <p style="margin-bottom:10px;font-size:14px;">
+        Component: <strong>${data.components_name}</strong><br>
+        Material No: <strong>${data.material_no}</strong><br>
+        Model: <strong>${data.model}</strong>
+      </p>
+    `,
+        input: 'number',
+        inputLabel: 'Enter quantity to issue',
+        inputPlaceholder: 'Quantity',
+        inputAttributes: {
+          min: 1,
+          step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Confirm Issue',
+        cancelButtonText: 'Cancel',
+        inputValidator: (value) => {
+          if (!value || value <= 0) {
+            return 'Please enter a valid quantity';
+          }
+        }
+      });
+
+      if (customQty) {
+        const issueData = {
+          id: data.id,
+          material_no: data.material_no,
+          component_name: data.components_name,
+          quantity: parseFloat(customQty),
+          process_quantity: data.process_quantity,
+          model: data.model,
+          stage_name: data.stage_name,
+          type: data.usage_type,
+          reference_no: reference_no
+        };
+
+        console.log(issueData);
+
+        sendIssueRequest(issueData);
+      }
+    }
+
+    function sendIssueRequest(data) {
+      console.log(data);
+
+      fetch('api/rm/issueRM', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.status === 'success') {
+            showAlert('success', 'Success', response.message || 'Issued successfully.');
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000); // matches your auto-close timer
+          } else {
+            showAlert('error', 'Error', response.message || 'Issue failed.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showAlert('error', 'Error', 'Something went wrong.');
+        });
+    }
 
     enableTableSorting(".table");
   </script>

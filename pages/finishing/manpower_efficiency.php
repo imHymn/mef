@@ -187,25 +187,20 @@
                             try {
                                 const json = JSON.parse(text);
                                 if (json.success) {
-                                    Swal.fire({
-                                        title: 'Reset!',
-                                        text: `Data has been reset and quantity updated.`,
-                                        icon: 'success',
-                                        timer: 1500,
-                                        showConfirmButton: false
-                                    });
+                                    showAlert('success', 'Reset!', 'Data has been reset and quantity updated.');
                                 } else {
-                                    Swal.fire('Error', json.message || 'Authorization failed.', 'error');
+                                    showAlert('error', 'Error', json.message || 'Authorization failed.');
                                 }
                             } catch (err) {
                                 console.error('❌ JSON parse error:', err);
-                                Swal.fire('Error', 'Invalid JSON response from server.', 'error');
+                                showAlert('error', 'Error', 'Invalid JSON response from server.');
                             }
                         })
                         .catch(err => {
-                            Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
                             console.error(err);
+                            showAlert('error', 'Error', 'Something went wrong. Please try again.');
                         });
+
                 }
             });
         }

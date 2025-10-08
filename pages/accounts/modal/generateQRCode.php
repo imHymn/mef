@@ -290,17 +290,10 @@
 
   async function generateFiltered() {
     if (selectedIds.size === 0) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'No Users Selected',
-        text: 'Please select at least one user before generating QR codes.',
-        confirmButtonColor: '#3085d6',
-        customClass: {
-          popup: 'swal-sm' // add your custom CSS class
-        }
-      });
+      showAlert('warning', 'No Users Selected', 'Please select at least one user before generating QR codes.');
       return;
     }
+
 
     const selectedUsers = userData.filter(u => selectedIds.has(u.user_id));
 
@@ -330,26 +323,11 @@
     const result = await response.json();
 
     if (result.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'QR Codes Generated',
-        text: 'The QR code PDF has been successfully created and user data updated.',
-        confirmButtonColor: '#28a745',
-        customClass: {
-          popup: 'swal-sm' // add your custom CSS class
-        }
-      });
+      showAlert('success', 'QR Codes Generated', 'The QR code PDF has been successfully created and user data updated.');
     } else {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Update Failed',
-        text: result.message || 'Failed to update user data.',
-        confirmButtonColor: '#dc3545',
-        customClass: {
-          popup: 'swal-sm' // add your custom CSS class
-        }
-      });
+      showAlert('error', 'Update Failed', result.message || 'Failed to update user data.');
     }
+
   }
 
 

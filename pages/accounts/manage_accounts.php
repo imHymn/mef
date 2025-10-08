@@ -232,39 +232,17 @@
                             .then(res => res.json())
                             .then(response => {
                                 if (response.success) {
-                                    Swal.fire({
-                                        title: 'Deleted!',
-                                        text: response.message,
-                                        icon: 'success',
-                                        customClass: {
-                                            popup: 'swal-sm'
-                                        }
-                                    });
-
+                                    showAlert('success', 'Deleted!', response.message || 'Record deleted successfully.');
                                     loadAccounts(); // Refresh table
                                 } else {
-                                    Swal.fire({
-                                        title: 'Failed!',
-                                        text: response.message,
-                                        icon: 'error',
-                                        customClass: {
-                                            popup: 'swal-sm'
-                                        }
-                                    });
-
+                                    showAlert('error', 'Failed!', response.message || 'Failed to delete record.');
                                 }
                             })
                             .catch(error => {
                                 console.error('Delete error:', error);
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: 'An error occurred while deleting.',
-                                    icon: 'error',
-                                    customClass: {
-                                        popup: 'swal-sm'
-                                    }
-                                });
+                                showAlert('error', 'Error!', 'An error occurred while deleting.');
                             });
+
                     }
                 });
             });

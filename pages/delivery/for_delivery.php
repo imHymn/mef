@@ -182,18 +182,14 @@
             const modelKey = (item.model || '').toUpperCase();
 
             if (item.active === null && specialModels.includes(modelKey)) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Cannot proceed',
-                    text: 'The order is still in process.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        popup: 'swal-sm'
-                    }
-                });
-
+                showAlert(
+                    'warning',
+                    'Cannot Proceed',
+                    'The order is still in process.'
+                );
                 return; // stop further action
             }
+
 
             specialModels = [...specialModels, 'VALERIE', 'PNR'];
 
@@ -284,56 +280,26 @@
                             .then(r => r.json())
                             .then(res => {
                                 if (res.status === 'success') {
-                                    Swal.fire({
-                                        title: 'Success',
-                                        text: res.message,
-                                        icon: 'success',
-                                        customClass: {
-                                            popup: 'swal-sm'
-                                        }
-                                    }).then(() => {
-                                        item.quantity -= qty; // update only on success
-
-                                        window.location.reload();
-                                    });
-
-
+                                    showAlert('success', 'Success', res.message || 'Action completed successfully.')
+                                        .then(() => {
+                                            item.quantity -= qty;
+                                            window.location.reload();
+                                        });
                                 } else {
-                                    Swal.fire({
-                                        title: 'Error',
-                                        text: res.message || 'Action failed.',
-                                        icon: 'error',
-                                        customClass: {
-                                            popup: 'swal-sm'
-                                        }
-                                    });
-
+                                    showAlert('error', 'Error', res.message || 'Action failed.');
                                 }
                             })
                             .catch(err => {
                                 console.error(err);
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Something went wrong while connecting to the server.',
-                                    icon: 'error',
-                                    customClass: {
-                                        popup: 'swal-sm'
-                                    }
-                                });
-
+                                showAlert('error', 'Error', 'Something went wrong while connecting to the server.');
                             });
+
                     });
                 })
                 .catch(err => {
                     console.error(err);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Failed to load truck list.',
-                        icon: 'error',
-                        customClass: {
-                            popup: 'swal-sm'
-                        }
-                    });
+                    showAlert('error', 'Error', 'Failed to load truck list.');
+
 
                 });
         }

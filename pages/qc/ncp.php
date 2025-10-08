@@ -361,42 +361,26 @@
 
 
       if (good === 0 && no_good === 0) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Missing Data',
-          text: 'Please enter at least one value (Good, No Good, Rework, or Replace).'
-        });
+        showAlert('warning', 'Missing Data', 'Please enter at least one value (Good, No Good, Rework, or Replace).');
         return;
       }
 
       // ✅ Quantity limit check
       if (selectedRowData.qc_quantity > 0) {
         if (quantity > selectedRowData.qc_quantity) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Quantity',
-            text: `Quantity must be less than or equal to ${selectedRowData.qc_quantity}.`
-          });
+          showAlert('error', 'Invalid Quantity', `Quantity must be less than or equal to ${selectedRowData.qc_quantity}.`);
           return;
         }
       } else {
         if (quantity > selectedRowData.quantity) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Quantity',
-            text: `Quantity must be less than or equal to ${selectedRowData.quantity}.`
-          });
+          showAlert('error', 'Invalid Quantity', `Quantity must be less than or equal to ${selectedRowData.quantity}.`);
           return;
         }
       }
 
       // ✅ Good + No Good consistency
       if ((good + no_good) !== quantity) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Mismatch Detected',
-          text: `Good + No Good must equal ${quantity}.`
-        });
+        showAlert('error', 'Mismatch Detected', `Good + No Good must equal ${quantity}.`);
         return;
       }
 
@@ -457,14 +441,14 @@
           if (mode === 'timeOut') {
             const expectedPersonInCharge = selectedRowData.qc_person_incharge || '';
             if (full_name !== expectedPersonInCharge) {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Person In-Charge Mismatch',
-                text: `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`,
-                confirmButtonText: 'OK'
-              });
+              showAlert(
+                'warning',
+                'Person In-Charge Mismatch',
+                `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`
+              );
               return;
             }
+
           }
 
           let data = {
@@ -524,24 +508,18 @@
             })
             .then(res => res.json())
             .then(response => {
-
               if (response.success) {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Your operation was successful!',
-                  confirmButtonColor: '#3085d6'
-                }).then(() => {
-                  window.location.reload();
-                });
+                showAlert('success', 'Success', 'Your operation was successful!');
+                setTimeout(() => window.location.reload(), 2000); // reload after showing success
               } else {
-                Swal.fire('Error', response.message || 'Operation failed.', 'error');
+                showAlert('error', 'Error', response.message || 'Operation failed.');
               }
             })
             .catch(err => {
               console.error('Request failed', err);
-              Swal.fire('Error', 'Something went wrong.', 'error');
+              showAlert('error', 'Error', 'Something went wrong.');
             });
+
         },
         onCancel: () => {
 

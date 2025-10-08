@@ -124,15 +124,11 @@ if (!empty($_SESSION['specific_section'])) {
                     <span id="selectedModelDisplay" class="my-3 font-weight-bold text-dark" style="font-size:18px"></span>
 
                     <ul class="navbar-nav d-flex align-items-center">
-
-                        <!-- New Icon / Logo -->
                         <li class="nav-item me-3">
                             <a href="#" class="nav-link" id="announcementTrigger" title="Announcements">
                                 <span>&#128276;</span> <!-- 🔔 Bell icon -->
                             </a>
                         </li>
-
-                        <!-- Existing Profile Icon -->
                         <li class="nav-item dropdown nav-profile">
                             <a href="#" class="nav-link" id="profileDropdownToggle">
                                 <span>&#128100;</span>

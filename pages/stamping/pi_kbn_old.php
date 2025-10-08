@@ -381,29 +381,25 @@
 
             // 🚫 If none of the allowed conditions are true, block time-in
             if (!hasOngoing && !hasAnyDone && !allDone) {
-              Swal.fire({
-                icon: 'warning',
-                title: `Cannot Time-In`,
-                text: `The previous process didn't meet its requirements to proceed.`,
-                customClass: {
-                  popup: 'swal-sm' // apply your small popup style
-                }
-              });
+              showAlert(
+                'warning',
+                'Cannot Time-In',
+                'The previous process didn’t meet its requirements to proceed.'
+              );
               return;
             }
 
+
           }
           if (!hasOngoing && !allDone && !prevStageCompleted && !hasAnyDone && !isSpecialSection) {
-            Swal.fire({
-              icon: 'warning',
-              title: `Cannot Time-In`,
-              text: `The previous process didn't meet its requirements to proceed.`,
-              customClass: {
-                popup: 'swal-sm' // apply your small popup style
-              }
-            });
+            showAlert(
+              'warning',
+              'Cannot Time-In',
+              'The previous process didn’t meet its requirements to proceed.'
+            );
             return;
           }
+
 
         }
 
@@ -440,14 +436,11 @@
           const inputQuantity = parseInt(document.getElementById('timeoutQuantity').value, 10);
 
           if (!inputQuantity || inputQuantity <= 0) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Invalid Quantity',
-              text: 'Please enter a valid, positive quantity greater than 0.',
-              customClass: {
-                popup: 'swal-sm' // apply your small popup style
-              }
-            });
+            showAlert(
+              'warning',
+              'Invalid Quantity',
+              'Please enter a valid, positive quantity greater than 0.'
+            );
             return;
           }
 
@@ -465,41 +458,28 @@
             totalQuantity *= 2
           }
           if (inputQuantity > pendingQuantity) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Pending Quantity Limit Exceeded',
-              html: `
-    <p>You entered <strong>${inputQuantity}</strong> units.</p>
-    <p>But only <strong>${pendingQuantity}</strong> units are pending for processing.</p>
-    <p>Please adjust your quantity accordingly.</p>
-  `,
-              customClass: {
-                popup: 'swal-sm' // small popup for consistency
-              }
-            });
+            showAlert(
+              'error',
+              'Pending Quantity Limit Exceeded',
+              `You entered ${inputQuantity} units.\nBut only ${pendingQuantity} units are pending for processing.\nPlease adjust your quantity accordingly.`
+            );
             return;
-
           }
+
 
           // 🔒 Limit to totalQuantity
           if (sumQuantity + inputQuantity > totalQuantity) {
             const remaining = totalQuantity - sumQuantity;
-            Swal.fire({
-              icon: 'error',
-              title: 'Total Quantity Limit Exceeded',
-              html: `
-    <p>Reference #: <strong>${referenceNo}</strong></p>
-    <p>Already processed: <strong>${sumQuantity}</strong> / ${totalQuantity}</p>
-    <p>Your input of <strong>${inputQuantity}</strong> would exceed the total allowed.</p>
-    <p>You can only process up to <strong>${remaining}</strong> more units.</p>
-  `,
-              customClass: {
-                popup: 'swal-sm' // apply small popup styling
-              }
-            });
+
+            showAlert(
+              'error',
+              'Total Quantity Limit Exceeded',
+              `Reference #: ${referenceNo}\nAlready processed: ${sumQuantity} / ${totalQuantity}\nYour input of ${inputQuantity} would exceed the total allowed.\nYou can only process up to ${remaining} more units.`
+            );
 
             return;
           }
+
 
           // 🔒 NEW: Check if inputQuantity is less than or equal to the total "done" quantity from previous stage
           const currentStage = parseInt(selectedRowData.stage || 0);
@@ -517,20 +497,14 @@
               .reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
 
             if (inputQuantity > doneQtyFromPrevStage) {
-              Swal.fire({
-                icon: 'error',
-                title: 'Exceeded Previous Process Output',
-                html: `
-            <p>You entered <strong>${inputQuantity}</strong> units for Time-Out.</p>
-            <p>But only <strong>${doneQtyFromPrevStage}</strong> units were completed in the previous process.</p>
-            <p>Please enter a quantity within that limit.</p>
-          `,
-                customClass: {
-                  popup: 'swal-sm' // apply small popup styling
-                }
-              });
+              showAlert(
+                'error',
+                'Exceeded Previous Process Output',
+                `You entered ${inputQuantity} units for Time-Out.\nBut only ${doneQtyFromPrevStage} units were completed in the previous process.\nPlease enter a quantity within that limit.`
+              );
               return;
             }
+
           }
 
           selectedRowData.inputQuantity = inputQuantity;
@@ -721,26 +695,13 @@
               }
             });
           } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: data.message || 'Could not fetch stage data.',
-              customClass: {
-                popup: 'swal-sm'
-              }
-            });
+            showAlert('error', 'Error', data.message || 'Could not fetch stage data.');
+
           }
         })
         .catch(err => {
-          console.error('Fetch error:', err);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Something went wrong.',
-            customClass: {
-              popup: 'swal-sm'
-            }
-          });
+          showAlert('error', 'Error', 'Something went wrong.');
+
         });
 
 
@@ -765,17 +726,10 @@
 
       if (!selectedRowData) {
         console.error("No selectedRowData available!");
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No data selected for processing.',
-          customClass: {
-            popup: 'swal-sm'
-          }
-        });
-
+        showAlert('error', 'Error', 'No data selected for processing.');
         return;
       }
+
       const section = "STAMPING";
       const role = "operator";
 
@@ -790,15 +744,12 @@
           if (mode === 'time-out') {
             const expectedPerson = selectedRowData.person_incharge || '';
             if (full_name !== expectedPerson) {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Person In-Charge Mismatch',
-                text: `Scanned name "${full_name}" does not match assigned person "${expectedPerson}".`,
-                confirmButtonText: 'OK',
-                customClass: {
-                  popup: 'swal-sm'
-                }
-              });
+              showAlert(
+                'warning',
+                'Person In-Charge Mismatch',
+                `Scanned name "${full_name}" does not match assigned person "${expectedPerson}".`
+              );
+
               return; // ⛔ Stop further execution
             }
           }
@@ -856,39 +807,20 @@
             .then(res => res.json())
             .then(response => {
               if (response.status === 'success') {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: response.message || `${mode.replace('-', ' ')} recorded.`,
-                  customClass: {
-                    popup: 'swal-sm'
-                  }
-                }).then(() => {
-                  // Refresh data after success
-                  window.location.reload();
-                });
+                showAlert('success', 'Success', response.message || `${mode.replace('-', ' ')} recorded.`)
+                  .then(() => {
+                    // Refresh data after success
+                    window.location.reload();
+                  });
               } else {
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Error',
-                  text: response.message || 'Something went wrong.',
-                  customClass: {
-                    popup: 'swal-sm'
-                  }
-                });
+                showAlert('error', 'Error', response.message || 'Something went wrong.');
               }
             })
             .catch(err => {
               console.error(err);
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Network error occurred.',
-                customClass: {
-                  popup: 'swal-sm'
-                }
-              });
+              showAlert('error', 'Error', 'Network error occurred.');
             });
+
 
         },
         onCancel: () => {

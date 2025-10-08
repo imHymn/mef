@@ -401,40 +401,20 @@
       .then(res => res.json())
       .then(response => {
         if (response.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Account created successfully!',
-            confirmButtonColor: '#3085d6',
-            customClass: {
-              popup: 'swal-sm'
-            }
-          }).then(() => {
+          showAlert('success', 'Success', 'Account created successfully!');
+          setTimeout(() => {
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) modalInstance.hide();
             location.reload();
-          });
+          }, 2000); // matches success auto-close
         } else {
-          Swal.fire({
-            title: 'Error',
-            text: response.message,
-            icon: 'error',
-            customClass: {
-              popup: 'swal-sm'
-            }
-          });
+          showAlert('error', 'Error', response.message || 'Failed to create account.');
         }
       })
       .catch(err => {
         console.error('Request failed', err);
-        Swal.fire({
-          title: 'Error',
-          text: 'Something went wrong.',
-          icon: 'error',
-          customClass: {
-            popup: 'swal-sm'
-          }
-        });
+        showAlert('error', 'Error', 'Something went wrong.');
       });
+
   });
 </script>

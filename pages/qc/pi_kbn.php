@@ -425,29 +425,17 @@
 
       // ❌ Check if required fields are filled
       if (goodInput.value === '' || nogoodInput.value === '') {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Missing Input',
-          text: 'Please fill in both Good and No Good quantities.'
-        });
+        showAlert('warning', 'Missing Input', 'Please fill in both Good and No Good quantities.');
         return;
       }
 
       if (!selectedRowData) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No selected item data.'
-        });
+        showAlert('error', 'Error', 'No selected item data.');
         return;
       }
 
       if (inputQty > selectedRowData.total_quantity) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Quantity',
-          text: `Total (Good + No Good = ${inputQty}) must not exceed total quantity (${selectedRowData.total_quantity}).`
-        });
+        showAlert('error', 'Invalid Quantity', `Total (Good + No Good = ${inputQty}) must not exceed total quantity (${selectedRowData.total_quantity}).`);
         return;
       }
 
@@ -485,11 +473,11 @@
       console.log("maxTotalQuantity", maxTotalQuantity);
 
       if (sumDoneQuantity + inputQty > maxTotalQuantity) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Quantity Exceeded',
-          text: `Total done quantity (${sumDoneQuantity}) plus entered quantity (${inputQty}) exceeds maximum allowed total quantity (${maxTotalQuantity}).`
-        });
+        showAlert(
+          'error',
+          'Quantity Exceeded',
+          `Total done quantity (${sumDoneQuantity}) plus entered quantity (${inputQty}) exceeds maximum allowed total quantity (${maxTotalQuantity}).`
+        );
         return;
       }
 
@@ -529,14 +517,14 @@
           if (mode === 'timeOut') {
             const expectedPersonInCharge = selectedRowData.person_incharge || '';
             if (full_name !== expectedPersonInCharge) {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Person In-Charge Mismatch',
-                text: `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`,
-                confirmButtonText: 'OK'
-              });
+              showAlert(
+                'warning',
+                'Person In-Charge Mismatch',
+                `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`
+              );
               return;
             }
+
           }
 
           let data = {
@@ -583,22 +571,17 @@
             .then(response => response.json())
             .then(result => {
               if (result.success === true) {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Success',
-                  text: 'Operation completed successfully!',
-                  confirmButtonColor: '#3085d6'
-                }).then(() => {
-                  window.location.reload();
-                });
+                showAlert('success', 'Success', 'Operation completed successfully!');
+                setTimeout(() => window.location.reload(), 2000); // optional delay for auto-close
               } else {
-                Swal.fire('Error', 'Submission failed.', 'error');
+                showAlert('error', 'Error', 'Submission failed.');
               }
             })
             .catch(error => {
               console.error('Submission error:', error);
-              Swal.fire('Error', 'Something went wrong.', 'error');
+              showAlert('error', 'Error', 'Something went wrong.');
             });
+
         },
         onCancel: () => {
 
