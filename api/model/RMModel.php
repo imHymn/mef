@@ -10,48 +10,83 @@ class RMModel
     }
     public function getIssuedComponents($model)
     {
-        $strictMaterialFilter = ($model === '32XD');
+        $strictMaterialFilter = true; // always filter by material_no for issued row
 
         $sql = "
-    SELECT 
-        i.*,
-        MAX(ci.stage_name) AS stage_name,
-        MAX(ci.process_quantity) AS process_quantity,
-        MAX(ci.usage_type) AS usage_type,
-        (
-            SELECT JSON_ARRAYAGG(
-                JSON_OBJECT(
-                    'material_no', sub.material_no,
-                    'material_description', sub.material_description,
-                    'usage', sub.usage,
-                    'component_name', sub.component_name
-                )
+SELECT 
+    i.*,
+    MAX(ci.stage_name) AS stage_name,
+    MAX(ci.process_quantity) AS process_quantity,
+    MAX(ci.usage_type) AS usage_type,
+    (
+        SELECT JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'material_no', r.material_no,
+                'material_description', r.material_description,
+                'usage', r.usage,
+                'component_name', r.component_name
             )
-            FROM (
-                SELECT DISTINCT 
-                    r.material_no, 
-                    r.material_description, 
-                    r.usage, 
-                    r.component_name
-                FROM rawmaterials_inventory r
-                WHERE r.component_name = i.component_name
-                " . ($strictMaterialFilter ? "AND r.material_no = i.material_no" : "") . "
-            ) AS sub
-        ) AS raw_materials
-    FROM issued_rawmaterials i
-    LEFT JOIN components_inventory ci 
-        ON ci.components_name = i.component_name
-        AND (
-            i.component_name IN ('CLIP 25', 'CLIP 60', 'NUT WELD', 'NUT WELD', 'NUT WELD (6)', 'NUT WELD (8)', 'NUT WELD (10)', 'NUT WELD (11.112)', 'NUT WELD (12)') 
-            OR " . ($strictMaterialFilter ? "ci.material_no = i.material_no" : "ci.material_no = i.material_no") . "
         )
-    WHERE i.delivered_at IS NULL
-    AND i.model = :model
-    GROUP BY i.id,i.reference_no
-    ";
+        FROM rawmaterials_inventory r
+        WHERE r.component_name = i.component_name
+        AND r.material_no = i.material_no
+    ) AS raw_materials
+FROM issued_rawmaterials i
+LEFT JOIN components_inventory ci 
+    ON ci.components_name = i.component_name
+    AND ci.material_no = i.material_no
+WHERE i.delivered_at IS NULL
+AND i.model = :model
+GROUP BY i.id
+";
+
 
         return $this->db->Select($sql, ['model' => $model]);
     }
+    // public function getIssuedComponents($model)
+    // {
+    //     $strictMaterialFilter = ($model === '32XD');
+
+    //     $sql = "
+    // SELECT 
+    //     i.*,
+    //     MAX(ci.stage_name) AS stage_name,
+    //     MAX(ci.process_quantity) AS process_quantity,
+    //     MAX(ci.usage_type) AS usage_type,
+    //     (
+    //         SELECT JSON_ARRAYAGG(
+    //             JSON_OBJECT(
+    //                 'material_no', sub.material_no,
+    //                 'material_description', sub.material_description,
+    //                 'usage', sub.usage,
+    //                 'component_name', sub.component_name
+    //             )
+    //         )
+    //         FROM (
+    //             SELECT DISTINCT 
+    //                 r.material_no, 
+    //                 r.material_description, 
+    //                 r.usage, 
+    //                 r.component_name
+    //             FROM rawmaterials_inventory r
+    //             WHERE r.component_name = i.component_name
+    //             " . ($strictMaterialFilter ? "AND r.material_no = i.material_no" : "") . "
+    //         ) AS sub
+    //     ) AS raw_materials
+    // FROM issued_rawmaterials i
+    // LEFT JOIN components_inventory ci 
+    //     ON ci.components_name = i.component_name
+    //     AND (
+    //         i.component_name IN ('CLIP 25', 'CLIP 60', 'NUT WELD', 'NUT WELD', 'NUT WELD (6)', 'NUT WELD (8)', 'NUT WELD (10)', 'NUT WELD (11.112)', 'NUT WELD (12)') 
+    //         OR " . ($strictMaterialFilter ? "ci.material_no = i.material_no" : "ci.material_no = i.material_no") . "
+    //     )
+    // WHERE i.delivered_at IS NULL
+    // AND i.model = :model
+    // GROUP BY i.id,i.reference_no
+    // ";
+
+    //     return $this->db->Select($sql, ['model' => $model]);
+    // }
     public function getIssuedHistory($model)
     {
         $sql = "
@@ -256,14 +291,13 @@ class RMModel
         $sql = "INSERT INTO `stamping` 
 (`material_no`, `components_name`, `process_quantity`, `stage`, `stage_name`, `section`, 
 `cycle_time`, `machine_name`, `manpower`, `total_quantity`, `pending_quantity`, `status`, 
-`reference_no`, `created_at`, `batch`, `pair`,`duplicated`,model,fuel_type,customer_id)
+`reference_no`, `created_at`, `batch`, `pair`,`duplicated`, model, fuel_type, customer_id)
 VALUES 
 (:material_no, :components_name, :process_quantity, :stage, :stage_name, :section, 
 :cycle_time, :machine_name, :manpower, :total_quantity, :pending_quantity, :status, 
-:reference_no, :created_at, :batch, :pair,:duplicated,:model,:fuel_type,:customer_id)
+:reference_no, :created_at, :batch, :pair, :duplicated, :model, :fuel_type, :customer_id)
 ";
 
-        // Extract these first
         $processQty = (int) $data['process_quantity'];
         $totalQty   = $data['quantity'];
         $materialNo = $data['material_no'];
@@ -273,45 +307,50 @@ VALUES
         $customerID = $data['reference_no'];
         $nextBatch = $this->getNextBatchNumber() + 1;
 
-        error_log(print_r($flattenedStages, true));
-
         for ($i = 0; $i < $processQty; $i++) {
             if (!isset($flattenedStages[$i])) {
                 return "Flattened stage index $i is missing";
             }
 
             $stageIndex = $i + 1;
-            $referenceNo = $dateToday . '-' . str_pad($existingCount + $stageIndex, 4, '0', STR_PAD_LEFT);
-            $params = [
-                ':material_no'       => $materialNo,
-                ':components_name'   => $componentName,
-                ':process_quantity'  => $processQty,
-                ':stage'             => $stageIndex,
-                ':stage_name'        => $flattenedStages[$i]['stage_name'],
-                ':section'           => $flattenedStages[$i]['section'],
-                ':cycle_time'        => $flattenedStages[$i]['cycle_time'] ?? 0,
-                ':machine_name'      => $flattenedStages[$i]['machine_name'] ?? null,
-                ':manpower'          => $flattenedStages[$i]['manpower'] ?? null,  // ✅ ADD THIS
-                ':total_quantity'    => $totalQty,
-                ':pending_quantity'  => $totalQty,
-                ':status'            => 'pending',
-                ':reference_no'      => $referenceNo,
-                ':created_at'        => $createdAt,
-                ':batch'             => $nextBatch,
-                ':model'             => $model,
-                ':customer_id'      => $customerID,
-                ':fuel_type'        => $data['fuel_type'] ?? null,
-                ':pair'              => $data['pair'] ?? null,
-                ':duplicated'              => 1
-            ];
+            $manpower = $flattenedStages[$i]['manpower'] ?? 1;
+            $rowsToInsert = $manpower === 2 ? 2 : 1; // duplicate if manpower is 2
 
-            if (!$this->db->Insert($sql, $params)) {
-                return false;
+            for ($dup = 0; $dup < $rowsToInsert; $dup++) {
+                $referenceNo = $dateToday . '-' . str_pad($existingCount + $stageIndex + $dup, 4, '0', STR_PAD_LEFT);
+
+                $params = [
+                    ':material_no'       => $materialNo,
+                    ':components_name'   => $componentName,
+                    ':process_quantity'  => $processQty,
+                    ':stage'             => $stageIndex,
+                    ':stage_name'        => $flattenedStages[$i]['stage_name'],
+                    ':section'           => $flattenedStages[$i]['section'],
+                    ':cycle_time'        => $flattenedStages[$i]['cycle_time'] ?? 0,
+                    ':machine_name'      => $flattenedStages[$i]['machine_name'] ?? null,
+                    ':manpower'          => $manpower,
+                    ':total_quantity'    => $totalQty,
+                    ':pending_quantity'  => $totalQty,
+                    ':status'            => 'pending',
+                    ':reference_no'      => $referenceNo,
+                    ':created_at'        => $createdAt,
+                    ':batch'             => $nextBatch,
+                    ':model'             => $model,
+                    ':customer_id'       => $customerID,
+                    ':fuel_type'         => $data['fuel_type'] ?? null,
+                    ':pair'              => $data['pair'] ?? null,
+                    ':duplicated'        => 1
+                ];
+
+                if (!$this->db->Insert($sql, $params)) {
+                    return false;
+                }
             }
         }
 
         return true;
     }
+
     public function updateIssuedRawmaterials($id, $quantity)
     {
         $sql = "UPDATE issued_rawmaterials 

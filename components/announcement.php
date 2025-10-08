@@ -82,12 +82,10 @@
                 </button>
             </div>
 
-            <div class="modal-body p-0">
-                <!-- Tabs navigation -->
+            <div class="modal-body p-2">
                 <ul class="nav nav-tabs" id="announcementsTab" role="tablist"></ul>
+                <div class="tab-content p-1" id="announcementsTabContent" style="border: 1px solid #ccc; border-radius: 5px;"></div>
 
-                <!-- Tabs content -->
-                <div class="tab-content p-3" id="announcementsTabContent"></div>
             </div>
 
             <div class="modal-footer border-0 pt-0">
@@ -147,6 +145,13 @@
 
             const categories = Object.keys(grouped);
 
+            // 🔹 Force System Update first
+            categories.sort((a, b) => {
+                if (a === "System Update") return -1;
+                if (b === "System Update") return 1;
+                return 0;
+            });
+
             categories.forEach((category, index) => {
                 // ---- Tab Button ----
                 const li = document.createElement("li");
@@ -172,7 +177,7 @@
 
                 grouped[category].forEach(item => {
                     const itemDiv = document.createElement("div");
-                    itemDiv.className = "border rounded p-3 mb-3 bg-white shadow-sm announcement-item";
+                    itemDiv.className = "border rounded p-3 mb-1 bg-white shadow-sm announcement-item";
                     itemDiv.style.transition = "transform 0.2s ease";
 
                     itemDiv.addEventListener("mouseover", () => itemDiv.style.transform = "scale(1.02)");

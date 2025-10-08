@@ -73,8 +73,6 @@
       fetch('api/rm/getIssuedComponents?model=' + encodeURIComponent(model))
         .then(response => response.json())
         .then(responseData => {
-
-          console.log('response', responseData)
           if (Array.isArray(responseData.data)) {
             renderIssuedComponentsTable(responseData.data);
 
@@ -576,7 +574,6 @@ return descriptions.map(desc => `
 
     function sendIssueRequest(data) {
       console.log(data);
-
       fetch('api/rm/issueRM', {
           method: 'POST',
           headers: {
@@ -587,20 +584,39 @@ return descriptions.map(desc => `
         .then(res => res.json())
         .then(response => {
           if (response.status === 'success') {
-            showAlert('success', 'Success', response.message || 'Issued successfully.');
-            setTimeout(() => {
+            Swal.fire({
+              title: 'Success',
+              text: response.message || 'Issued successfully.',
+              icon: 'success',
+              customClass: {
+                popup: 'swal-sm'
+              }
+            }).then(() => {
               window.location.reload();
-            }, 2000); // matches your auto-close timer
+            });
           } else {
-            showAlert('error', 'Error', response.message || 'Issue failed.');
+            Swal.fire({
+              title: 'Error',
+              text: response.message || 'Issue failed.',
+              icon: 'error',
+              customClass: {
+                popup: 'swal-sm'
+              }
+            });
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          showAlert('error', 'Error', 'Something went wrong.');
+          Swal.fire({
+            title: 'Error',
+            text: 'Something went wrong.',
+            icon: 'error',
+            customClass: {
+              popup: 'swal-sm'
+            }
+          });
         });
     }
-
 
 
     function handleRefresh(id, component_name) {
@@ -646,17 +662,39 @@ return descriptions.map(desc => `
             .then(res => res.json())
             .then(data => {
               if (data.success) {
-                showAlert('success', 'Deleted!', 'The raw material issue has been deleted.');
-                setTimeout(() => window.location.reload(), 1500); // optional auto-reload after success
+                Swal.fire({
+                  title: 'Deleted!',
+                  text: 'The raw material issue has been deleted.',
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false,
+                  customClass: {
+                    popup: 'swal-sm'
+                  }
+                });
+
               } else {
-                showAlert('error', 'Error', data.message || 'Something went wrong.');
+                Swal.fire({
+                  title: 'Error',
+                  text: data.message || 'Something went wrong.',
+                  icon: 'error',
+                  customClass: {
+                    popup: 'swal-sm'
+                  }
+                });
               }
             })
             .catch(err => {
               console.error('Delete error:', err);
-              showAlert('error', 'Error', 'Failed to delete.');
+              Swal.fire({
+                title: 'Error',
+                text: 'Failed to delete.',
+                icon: 'error',
+                customClass: {
+                  popup: 'swal-sm'
+                }
+              });
             });
-
         }
       });
     }

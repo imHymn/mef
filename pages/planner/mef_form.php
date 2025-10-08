@@ -107,6 +107,9 @@
           let hasLot = false;
           let hasFuel = false;
           let statuses = null;
+          let wrapper; // make wrapper accessible outside function
+          let qtyInput;
+
           document.addEventListener('DOMContentLoaded', function() {
               let data = []; // Store API results
               const variantWrapper = document.getElementById('variantWrapper');
@@ -148,7 +151,6 @@
               document.getElementById('modelSelect')?.addEventListener('change', function() {
                   handleModelOrCustomerChange();
               });
-
               async function handleModelOrCustomerChange() {
                   const model = document.getElementById('modelSelect').value;
                   const customer = document.getElementById('customerSelect').value;
@@ -181,6 +183,7 @@
                   hasLot = filteredData.some(item => item.lot && item.lot !== null);
                   lotWrapper.style.display = hasLot ? 'block' : 'none';
                   hasFuel = filteredData.some(item => item.fuel && item.fuel !== null);
+
                   if (hasLot) {
                       try {
                           const lotRes = await fetch(`api/planner/getPreviousLot?model=${encodeURIComponent(model)}&customer_name=${encodeURIComponent(customer)}`);
@@ -195,7 +198,6 @@
 
                   try {
                       const variant = variantInput.value.toUpperCase();
-
                       const params = new URLSearchParams({
                           model: model,
                           customer_name: customer,
@@ -206,7 +208,7 @@
                       const skuData = await skuRes.json();
 
                       // Build table
-                      const wrapper = document.createElement('div');
+                      wrapper = document.createElement('div'); // assign to outer wrapper
                       wrapper.className = 'table-responsive';
 
                       const table = document.createElement('table');
@@ -217,10 +219,9 @@
                 <tr>
                     <th>Material No.</th>
                     <th>Material Description</th>
-                       ${hasFuel ? '<th>Fuel Type</th>' : ''}
+                    ${hasFuel ? '<th>Fuel Type</th>' : ''}
                     <th class="d-none d-md-table-cell">Supplement Order</th>
                     <th class="text-center">Total Quantity</th>
-                    
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
@@ -231,17 +232,14 @@
                         <td class="materialDesc" style="white-space: normal; word-wrap: break-word;">${row.material_description}</td>
                         <td class="process d-none">${row.process || ''}</td>
                         ${hasFuel ? `
-                    <td>
-                        <select class="form-control form-control-md fuelType" 
-                                style="min-width: 90px;" 
-                                data-index="${index}">
-                            <option value="">-- Select Fuel --</option>
-                            <option value="GAS" ${row.fuel_type === "GAS" ? "selected" : ""}>GAS</option>
-                            <option value="DIESEL" ${row.fuel_type === "DIESEL" ? "selected" : ""}>DIESEL</option>
-                        </select>
-                    </td>
-                ` : ''}
-                <td class="assemblySection d-none">${row.assembly_section || ''}</td>
+                        <td>
+                            <select class="form-control form-control-md fuelType" style="min-width: 90px;" data-index="${index}">
+                                <option value="">-- Select Fuel --</option>
+                                <option value="GAS" ${row.fuel_type === "GAS" ? "selected" : ""}>GAS</option>
+                                <option value="DIESEL" ${row.fuel_type === "DIESEL" ? "selected" : ""}>DIESEL</option>
+                            </select>
+                        </td>` : ''}
+                        <td class="assemblySection d-none">${row.assembly_section || ''}</td>
                         <td class="subComponent d-none">${row.sub_component || ''}</td>
                         <td class="assemblyProcess d-none">${row.assembly_process || ''}</td>
                         <td class="assemblyTotalprocess d-none">${row.total_process || ''}</td>
@@ -265,33 +263,38 @@
                       wrapper.appendChild(table);
                       container.appendChild(wrapper);
 
-                      const qtyInput = document.getElementById('qty');
+                      qtyInput = document.getElementById('qty'); // assign globally
 
-                      const updateAllTotalQuantities = () => {
+                      // Make update function global inside this module
+                      window.updateAllTotalQuantities = () => {
                           const baseQty = parseInt(qtyInput?.value) || 0;
-                          wrapper.querySelectorAll('.supplementInput').forEach((input, idx) => {
-                              const suppQty = parseInt(input.value) || 0;
-                              const display = document.getElementById(`totalQty${idx}`);
-                              if (display) display.textContent = baseQty + suppQty;
+                          wrapper.querySelectorAll('tbody tr').forEach(tr => {
+                              const supplementInput = tr.querySelector('.supplementInput');
+                              const totalDisplay = tr.querySelector('.totalQty');
+                              if (supplementInput && totalDisplay) {
+                                  const suppQty = parseInt(supplementInput.value) || 0;
+                                  totalDisplay.textContent = baseQty + suppQty;
+                              }
                           });
                       };
-                      const attachEvents = () => {
-                          wrapper.querySelectorAll('.deleteRowBtn').forEach(btn => {
-                              btn.onclick = () => {
-                                  btn.closest('tr').remove();
-                                  wrapper.querySelectorAll('.supplementInput').forEach((inp, i) => inp.dataset.index = i);
-                                  updateAllTotalQuantities();
-                              };
-                          });
 
-                          wrapper.querySelectorAll('.supplementInput').forEach(input => {
-                              input.addEventListener('input', updateAllTotalQuantities);
-                          });
 
-                          qtyInput?.addEventListener('input', updateAllTotalQuantities);
-                      };
-                      attachEvents();
-                      updateAllTotalQuantities();
+                      // Delegated events
+                      wrapper.addEventListener('input', e => {
+                          if (e.target.classList.contains('supplementInput')) {
+                              window.updateAllTotalQuantities();
+                          }
+                      });
+
+                      wrapper.addEventListener('click', e => {
+                          if (e.target.classList.contains('deleteRowBtn')) {
+                              const row = e.target.closest('tr');
+                              if (row) row.remove();
+                              window.updateAllTotalQuantities();
+                          }
+                      });
+
+                      window.updateAllTotalQuantities();
                   } catch (error) {
                       console.error('Error fetching components:', error);
                       showAlert('error', 'Error', 'Failed to fetch components.');
@@ -416,18 +419,17 @@
 
 
               document.getElementById('increaseQty')?.addEventListener('click', () => {
-                  const qtyInput = document.getElementById('qty');
-                  let val = parseInt(qtyInput?.value) || 0;
-                  qtyInput.value = val + 30;
-                  qtyInput.dispatchEvent(new Event('input'));
+                  if (!qtyInput) return;
+                  qtyInput.value = (parseInt(qtyInput.value) || 0) + 30;
+                  window.updateAllTotalQuantities();
               });
 
               document.getElementById('decreaseQty')?.addEventListener('click', () => {
-                  const qtyInput = document.getElementById('qty');
-                  let val = parseInt(qtyInput?.value) || 0;
+                  if (!qtyInput) return;
+                  const val = parseInt(qtyInput.value) || 0;
                   if (val >= 30) {
                       qtyInput.value = val - 30;
-                      qtyInput.dispatchEvent(new Event('input'));
+                      window.updateAllTotalQuantities();
                   }
               });
           });

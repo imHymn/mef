@@ -71,7 +71,9 @@
     const filterColumn = document.getElementById('filter-column');
     const filterInput = document.getElementById('filter-input');
     const paginationContainerId = 'pagination';
-
+    const userRole = "<?= $role ?>";
+    const userProduction = <?= json_encode($section) ?>;
+    const userProductionLocation = <?= json_encode($specific_section) ?>;
     let componentsData = [];
     let paginator = null;
     let model = null;
@@ -138,6 +140,9 @@
 
     function renderTable(data) {
       dataBody.innerHTML = '';
+      console.log(userRole)
+
+
 
       const statusPriority = {
         'Critical': 1,
@@ -208,7 +213,14 @@
           getRowData(item);
         });
       }
-
+      if (userRole !== "administrator") {
+        // Disable all issue buttons
+        document.querySelectorAll('.issueBtn').forEach(btn => {
+          btn.disabled = true; // disable click
+          btn.classList.add('btn-secondary'); // optional: make it look disabled
+          btn.classList.remove('btn-primary'); // optional: remove primary style
+        });
+      }
       const now = new Date();
       document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
     }

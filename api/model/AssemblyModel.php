@@ -441,7 +441,8 @@ class AssemblyModel
                     $status,
                     $referenceNo,
                     $model,
-                    $component['process']
+                    $component['process'],
+                    $component['pair']
                 );
             }
         }
@@ -601,7 +602,7 @@ class AssemblyModel
     {
         $sql = "
             SELECT  id, components_name, usage_type, actual_inventory,
-                    critical, minimum, reorder, normal, maximum_inventory,process
+                    critical, minimum, reorder, normal, maximum_inventory,process,pair
             FROM    components_inventory
             WHERE   material_no = :material_no
         ";
@@ -675,7 +676,8 @@ class AssemblyModel
         string $status,
         string $referenceNo,
         string $model,
-        ?string $process
+        ?string $process,
+        ?string $pair
     ): void {
 
         $isClip = in_array($componentName, ['CLIP 25', 'CLIP 60', 'NUT WELD', 'NUT WELD', 'NUT WELD (6)', 'NUT WELD (8)', 'NUT WELD (10)', 'NUT WELD (11.112)', 'NUT WELD (12)', 'REINFORCEMENT'], true);
@@ -722,10 +724,10 @@ class AssemblyModel
             $this->db->Insert(
                 "INSERT INTO issued_rawmaterials (
                 material_no, component_name, quantity,
-                status, reference_no, issued_at,model,`type`
+                status, reference_no, issued_at,model,`type`,pair
              ) VALUES (
                 :material_no, :component_name, :quantity,
-                :status, :reference_no, NOW(),:model,:type
+                :status, :reference_no, NOW(),:model,:type,:pair
              )",
                 [
                     ':material_no'    => $materialNo,
@@ -734,7 +736,8 @@ class AssemblyModel
                     ':status'         => $status,
                     ':reference_no'   => $referenceNo,
                     ':model'   => $model,
-                    ':type' => $process
+                    ':type' => $process,
+                    ':pair' => $pair
                 ]
             );
         }

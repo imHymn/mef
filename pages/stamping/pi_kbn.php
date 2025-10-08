@@ -449,7 +449,7 @@
               .then(response => {
                 if (response.status === 'success') {
                   showAlert('success', 'Success', response.message || `Time-In recorded.`);
-                  setTimeout(() => window.location.reload(), 2000); // reload after success
+                  // setTimeout(() => window.location.reload(), 2000); // reload after success
                 } else {
                   showAlert('error', 'Error', response.message || 'Something went wrong.');
                 }
@@ -711,7 +711,7 @@
             if (response.status === 'success') {
               showAlert('success', 'Success', response.message || 'Time-Out recorded.');
               // optional reload after short delay
-              setTimeout(() => window.location.reload(), 1500);
+              // setTimeout(() => window.location.reload(), 1500);
             } else {
               showAlert('error', 'Error', response.message || 'Something went wrong.');
             }
