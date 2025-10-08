@@ -48,31 +48,25 @@
 
                         try {
                             const json = JSON.parse(text);
-
                             if (json.success) {
-                                Swal.fire({
-                                    title: 'Reset!',
-                                    text: 'Data has been reset.',
-                                    icon: 'success',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
+                                showAlert('success', 'Reset!', 'Data has been reset.', 1500);
                             } else {
-                                Swal.fire('Error', json.message || 'Authorization failed.', 'error');
+                                showAlert('error', 'Error', json.message || 'Authorization failed.');
                             }
                         } catch (err) {
                             console.error('❌ JSON parse error:', err);
-                            Swal.fire('Error', 'Invalid JSON response from server.', 'error');
+                            showAlert('error', 'Error', 'Invalid JSON response from server.');
                         }
                     })
                     .catch(err => {
                         console.error('❌ Fetch failed:', err);
-                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                        showAlert('error', 'Error', 'Something went wrong. Please try again.');
                     });
             },
 
             onCancel: () => {
-                Swal.fire('Cancelled', 'QR scan cancelled.', 'info');
+                showAlert('info', 'Cancelled', 'QR scan cancelled.');
+
             }
         });
     }

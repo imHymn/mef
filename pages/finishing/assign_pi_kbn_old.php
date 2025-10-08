@@ -288,7 +288,7 @@ onclick="getTasks(
 
         function submitInspection() {
             if (!selectedRowData) { // no row selected
-                Swal.fire('Error', 'No record selected.', 'error');
+                showAlert('error', 'Error', 'No record selected.');
                 return;
             }
 
@@ -300,7 +300,7 @@ onclick="getTasks(
             const replaceRaw = replaceInput.value.trim();
 
             if (reworkRaw === '' && replaceRaw === '') {
-                Swal.fire('Missing Data', 'Please enter Rework or Replace quantity.', 'warning');
+                showAlert('warning', 'Missing Data', 'Please enter Rework or Replace quantity.');
                 return;
             }
 
@@ -309,15 +309,19 @@ onclick="getTasks(
             const quantity = rework + replace;
 
             if (quantity === 0) { // both zero (or invalid)
-                Swal.fire('Invalid Quantity', 'Total quantity cannot be zero.', 'error');
+                showAlert('error', 'Invalid Quantity', 'Total quantity cannot be zero.');
                 return;
             }
 
             if (selectedRowData.assembly_quantity && quantity > selectedRowData.assembly_quantity) {
-                Swal.fire('Invalid Quantity',
-                    `Quantity must be ≤ ${selectedRowData.assembly_quantity}.`, 'error');
+                showAlert(
+                    'error',
+                    'Invalid Quantity',
+                    `Quantity must be ≤ ${selectedRowData.assembly_quantity}.`
+                );
                 return;
             }
+
 
             Swal.fire({
                 title: 'Confirm Submission',
@@ -359,14 +363,14 @@ onclick="getTasks(
                     // ✅ Only check person-in-charge during timeout
                     const expectedPersonInCharge = selectedRowData.assembly_person_incharge || '';
                     if (mode === 'timeOut' && full_name !== expectedPersonInCharge) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Person In-Charge Mismatch',
-                            text: `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`,
-                            confirmButtonText: 'OK'
-                        });
+                        showAlert(
+                            'warning',
+                            'Person In-Charge Mismatch',
+                            `Scanned name "${full_name}" does not match assigned person "${expectedPersonInCharge}".`
+                        );
                         return;
                     }
+
 
                     const data = {
                         id: selectedRowData.id,
@@ -398,24 +402,19 @@ onclick="getTasks(
                         })
                         .then(res => res.json())
                         .then(response => {
-
                             if (response.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: 'Your operation was successful!',
-                                    confirmButtonColor: '#3085d6'
-                                }).then(() => {
-                                    window.location.reload();
-                                });
+                                showAlert('success', 'Success', 'Your operation was successful!');
+                                // Optionally reload after the timer (2s) if needed
+                                setTimeout(() => window.location.reload(), 2000);
                             } else {
-                                Swal.fire('Error', response.message || 'Operation failed.', 'error');
+                                showAlert('error', 'Error', response.message || 'Operation failed.');
                             }
                         })
                         .catch(err => {
                             console.error('Request failed', err);
-                            Swal.fire('Error', 'Something went wrong.', 'error');
+                            showAlert('error', 'Error', 'Something went wrong.');
                         });
+
                 },
                 onCancel: () => {
 

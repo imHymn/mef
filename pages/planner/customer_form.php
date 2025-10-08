@@ -70,14 +70,8 @@
             })
             .catch(err => {
                 console.error('Error fetching customer/model data:', err);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to load customer and model data.',
-                    icon: 'error',
-                    customClass: {
-                        popup: 'swal-sm'
-                    }
-                });
+                showAlert('error', 'Error', 'Failed to load customer and model data.');
+
 
             });
 
@@ -176,14 +170,7 @@
                 })
                 .catch(err => {
                     console.error('Error fetching components:', err);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Failed to fetch component data.',
-                        icon: 'error',
-                        customClass: {
-                            popup: 'swal-sm'
-                        }
-                    });
+                    showAlert('error', 'Error', 'Failed to fetch component data.');
 
                 });
 
@@ -199,17 +186,10 @@
             const rows = document.querySelectorAll('#material_components table tbody tr');
 
             if (!dateNeeded) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Missing Date Needed',
-                    text: 'Please choose a “Date Needed” before submitting.',
-                    confirmButtonColor: '#d33',
-                    customClass: {
-                        popup: 'swal-sm' // add your custom CSS class
-                    }
-                });
+                showAlert('error', 'Missing Date Needed', 'Please choose a “Date Needed” before submitting.');
                 return;
             }
+
 
             const payload = [];
             rows.forEach(row => {
@@ -236,17 +216,10 @@
             });
 
             if (payload.length === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'No Data',
-                    text: 'No valid components with quantity found to submit.',
-                    confirmButtonColor: '#d33',
-                    customClass: {
-                        popup: 'swal-sm' // add your custom CSS class
-                    }
-                });
+                showAlert('error', 'No Data', 'No valid components with quantity found to submit.');
                 return;
             }
+
             console.log('Submitting payload:', payload);
 
             Swal.fire({
@@ -266,18 +239,12 @@
             }).then(result => {
                 if (result.isConfirmed) {
                     // 🔹 Decide API URL based on model
-                    const modelName = payload[0]?.model || ""; // assuming all items share the same model
+                    const modelName = payload[0]?.model || "";
                     let apiUrl = 'api/planner/submitForm_allCustomer';
 
                     if (['MILLIARD', 'APS', 'KOMYO'].includes(modelName.toUpperCase())) {
-                        apiUrl = 'api/planner/submitForm_specificCustomer'; // <-- change this to your special API
+                        apiUrl = 'api/planner/submitForm_specificCustomer';
                     }
-                    //   const modelName = payload[0]?.model || ""; // assuming all items share the same model
-                    //                     let apiUrl = 'api/planner/submitForm_allcustomer';
-
-                    //                     if (['MILLIARD', 'APS', 'KOMYO'].includes(modelName.toUpperCase())) {
-                    //                         apiUrl = 'api/planner/submitForm_specificcustomer'; // <-- change this to your special API
-                    //                     }
 
                     fetch(apiUrl, {
                             method: 'POST',
@@ -293,38 +260,21 @@
                     <li><strong>${item.material_no}</strong>: ${item.components_name}<br><small>${item.reason}</small></li>
                 `).join('');
 
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Insufficient Stock',
-                                    html: `<p>${response.message}</p><ul>${issues}</ul>`,
-                                    confirmButtonColor: '#d33',
-                                    customClass: {
-                                        popup: 'swal-sm' // add your custom CSS class
-                                    }
-                                });
+                                showAlert(
+                                    'error',
+                                    'Insufficient Stock',
+                                    `${response.message}\n${issues}`
+                                );
+
                                 return;
                             }
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: 'Your delivery request was submitted.',
-                                confirmButtonColor: '#3085d6',
-                                customClass: {
-                                    popup: 'swal-sm' // add your custom CSS class
-                                }
-                            });
+                            showAlert('success', 'Success', 'Your delivery request was submitted.');
+
                         })
                         .catch(err => {
                             console.error('Submission error:', err);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Network Error',
-                                text: 'Failed to submit data. Please try again.',
-                                confirmButtonColor: '#d33',
-                                customClass: {
-                                    popup: 'swal-sm' // add your custom CSS class
-                                }
-                            });
+                            showAlert('error', 'Network Error', 'Failed to submit data. Please try again.');
+
                         });
                 }
             });

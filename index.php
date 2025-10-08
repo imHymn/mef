@@ -36,6 +36,7 @@ $pageMap = [
         'assembly_pi_kbn_component' => 'component_pi_kbn.php'
     ],
     'rm' => [
+        'issue' => 'issue.php',
         'issue_rm' => 'issue_rm.php',
         'issued_history' => 'issued_history.php'
     ],
@@ -80,7 +81,6 @@ $pageMap = [
         'finishing_sectional_efficiency' => 'sectional_efficiency.php',
     ],
     'announcement' => [
-        'announcement_create' => 'createAnnouncement.php',
         'announcement_list' => 'manageAnnouncement.php'
     ]
 

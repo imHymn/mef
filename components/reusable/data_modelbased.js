@@ -95,7 +95,7 @@ class ModelDrawer {
         this._renderModels(result.data || []);
       })
       .catch(() => {
-        Swal.fire("Error", "Failed to load customer and model data.", "error");
+        showAlert('error','Error', 'Failed to load customer and model data.');
       });
   }
 

@@ -385,7 +385,7 @@
               .sort((a, b) => (a.by_order ?? 0) - (b.by_order ?? 0));
 
             if (matchedItems.length === 0) {
-              Swal.fire('Not Found', `No item found assigned to "${full_name}"`, 'warning');
+              showAlert('warning', 'Not Found', `No item found assigned to "${full_name}".`);
               return resolve(false);
             }
 
@@ -415,11 +415,12 @@
             });
 
             if (!itemToProcess) {
-              Swal.fire(
+              showAlert(
+                'info',
                 mode === 'time_in' ? 'All Timed In' : 'All Timed Out',
-                `All tasks for this user are already ${mode === 'time_in' ? 'timed in' : 'timed out'}, or previous tasks need to be completed first.`,
-                'info'
+                `All tasks for this user are already ${mode === 'time_in' ? 'timed in' : 'timed out'}, or previous tasks need to be completed first.`
               );
+
               return resolve(false);
             }
 
@@ -485,16 +486,17 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            Swal.fire('Success', 'Assembly record assigned successfully.', 'success')
-              .then(() => window.location.reload());
+            showAlert('success', 'Success', 'Assembly record assigned successfully.');
+            setTimeout(() => window.location.reload(), 2000); // reload after alert closes
           } else {
-            Swal.fire('Error', data.message || 'Failed to assign assembly record.', 'error');
+            showAlert('error', 'Error', data.message || 'Failed to assign assembly record.');
           }
         })
         .catch(err => {
           console.error(err);
-          Swal.fire('Error', 'Something went wrong.', 'error');
+          showAlert('error', 'Error', 'Something went wrong.');
         });
+
     }
 
     function timeOut(item, full_name, qty) {
@@ -542,16 +544,17 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            Swal.fire('Success', 'Assembly record unassigned successfully.', 'success')
-              .then(() => window.location.reload());
+            showAlert('success', 'Success', 'Assembly record unassigned successfully.');
+            setTimeout(() => window.location.reload(), 2000); // wait for alert before reload
           } else {
-            Swal.fire('Error', data.message || 'Failed to unassign assembly record.', 'error');
+            showAlert('error', 'Error', data.message || 'Failed to unassign assembly record.');
           }
         })
         .catch(err => {
           console.error(err);
-          Swal.fire('Error', 'Something went wrong.', 'error');
+          showAlert('error', 'Error', 'Something went wrong.');
         });
+
     }
 
 
@@ -645,18 +648,20 @@
       const totalIfSubmitted = totalDone + quantity;
 
       if (totalIfSubmitted > maxQuantity) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Exceeded Quantity',
-          html: `The total quantity being assembled for <b>Reference No: ${currentRef}</b>, section <b>${currentSection}</b> and process <b>#${currentProcessNo}</b> exceeds the allowed maximum.<br><br>
-                <b>Total Already Done:</b> ${totalDone}<br>
-                <b>Input:</b> ${quantity}<br>
-                <b>Maximum Allowed:</b> ${maxQuantity}`,
-        });
+        showAlert(
+          'warning',
+          'Exceeded Quantity',
+          `The total quantity being assembled for <b>Reference No:</b> ${currentRef}, section <b>${currentSection}</b>, and process <b>#${currentProcessNo}</b> exceeds the allowed maximum.<br><br>
+    <b>Total Already Done:</b> ${totalDone}<br>
+    <b>Input:</b> ${quantity}<br>
+    <b>Maximum Allowed:</b> ${maxQuantity}`
+        );
+
         quantityInput.classList.add('is-invalid');
         quantityInput.focus();
         return;
       }
+
       quantityInput.classList.remove('is-invalid');
       quantityModal.hide();
 
@@ -711,15 +716,19 @@
           });
 
           if (insufficientItems.length > 0) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Cannot Proceed',
-              html: `The following components don't have enough stock:<br><ul style="text-align: left;">${
-            insufficientItems.map(i => `<li>${i.components_name}: ${i.actual_inventory} in stock</li>`).join('')
-          }</ul>`
-            });
+            const list = insufficientItems
+              .map(i => `<li>${i.components_name}: ${i.actual_inventory} in stock</li>`)
+              .join('');
+
+            showAlert(
+              'error',
+              'Cannot Proceed',
+              `The following components don't have enough stock:<br><ul style="text-align: left;">${list}</ul>`
+            );
+
             return false; // cannot proceed
           }
+
 
           let swalOptions;
           if (normalItems.length > 0) {

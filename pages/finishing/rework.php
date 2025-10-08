@@ -317,9 +317,14 @@
                             .sort((a, b) => (a.by_order ?? 0) - (b.by_order ?? 0));
                         console.log('Matched items for user:', matchedItems);
                         if (matchedItems.length === 0) {
-                            Swal.fire('Not Found', `No task found assigned to "${full_name}"`, 'warning');
+                            showAlert(
+                                'warning',
+                                'Not Found',
+                                `No task found assigned to "${full_name}"`
+                            );
                             return resolve(false);
                         }
+
 
                         // Find the task to process
                         const itemToProcess = matchedItems.find(item => {
@@ -335,13 +340,14 @@
                         });
 
                         if (!itemToProcess) {
-                            Swal.fire(
+                            showAlert(
+                                'info',
                                 mode === 'time_in' ? 'All Timed In' : 'All Timed Out',
-                                `All tasks for this user are already ${mode === 'time_in' ? 'timed in' : 'timed out'}.`,
-                                'info'
+                                `All tasks for this user are already ${mode === 'time_in' ? 'timed in' : 'timed out'}.`
                             );
                             return resolve(false);
                         }
+
 
                         console.log('Found task to process:', itemToProcess);
 
@@ -394,27 +400,25 @@
                 .then(res => res.json())
                 .then(response => {
                     if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Time-In Successful',
-                            text: `${full_name} has timed-in successfully.`,
-                        }).then(() => window.location.reload());
+                        showAlert('success', 'Time-In Successful', `${full_name} has timed-in successfully.`);
+                        setTimeout(() => window.location.reload(), 2000); // optional reload after alert
                         return true;
                     } else {
-                        Swal.fire('Error', response.message || 'Operation failed.', 'error');
+                        showAlert('error', 'Error', response.message || 'Operation failed.');
                         return false;
                     }
                 })
                 .catch(err => {
                     console.error('Request failed', err);
-                    Swal.fire('Error', 'Something went wrong.', 'error');
+                    showAlert('error', 'Error', 'Something went wrong.');
                     return false;
                 });
+
         }
 
         function submitInspection() {
             if (!selectedRowData) {
-                Swal.fire('Error', 'No record selected.', 'error');
+                showAlert('error', 'Error', 'No record selected.');
                 return;
             }
 
@@ -423,15 +427,19 @@
             const quantity = rework + replace;
 
             if (quantity === 0) {
-                Swal.fire('Invalid Quantity', 'Total quantity cannot be zero.', 'error');
+                showAlert('error', 'Invalid Quantity', 'Total quantity cannot be zero.');
                 return;
             }
 
             if (selectedRowData.assembly_quantity && quantity > selectedRowData.assembly_quantity) {
-                Swal.fire('Invalid Quantity',
-                    `Quantity must be ≤ ${selectedRowData.assembly_quantity}.`, 'error');
+                showAlert(
+                    'error',
+                    'Invalid Quantity',
+                    `Quantity must be ≤ ${selectedRowData.assembly_quantity}.`
+                );
                 return;
             }
+
 
             Swal.fire({
                 title: 'Confirm Submission',
@@ -482,16 +490,17 @@
                     .then(res => res.json())
                     .then(response => {
                         if (response.success) {
-                            Swal.fire('Success', 'Time-out recorded successfully.', 'success')
-                                .then(() => window.location.reload());
+                            showAlert('success', 'Success', 'Time-out recorded successfully.');
+                            setTimeout(() => window.location.reload(), 2000);
                         } else {
-                            Swal.fire('Error', response.message || 'Operation failed.', 'error');
+                            showAlert('error', 'Error', response.message || 'Operation failed.');
                         }
                     })
                     .catch(err => {
                         console.error('Request failed', err);
-                        Swal.fire('Error', 'Something went wrong.', 'error');
+                        showAlert('error', 'Error', 'Something went wrong.');
                     });
+
             });
         }
 

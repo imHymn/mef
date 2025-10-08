@@ -24,6 +24,11 @@ class StampingController
             return strtolower(trim($v));
         }, (array)$value);
     }
+    public function getLatestReferenceNo()
+    {
+        $referenceNo = $this->stampingModel->getLatestReferenceNo();
+        echo json_encode($referenceNo);
+    }
     public function reset_timein()
     {
         global $input;

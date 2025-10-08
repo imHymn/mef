@@ -150,9 +150,9 @@
             categories.forEach((category, index) => {
                 // ---- Tab Button ----
                 const li = document.createElement("li");
-                li.className = "nav-item";
+                li.className = "nav-item me-2";
                 const btn = document.createElement("a");
-                btn.className = "nav-link" + (index === 0 ? " active" : "");
+                btn.className = "nav-link px-3 py-2 " + (index === 0 ? "active bg-primary text-white rounded" : "bg-light text-dark rounded");
                 btn.href = "#";
                 btn.textContent = category;
                 btn.addEventListener("click", function(e) {
@@ -164,53 +164,38 @@
 
                 // ---- Tab Pane ----
                 const tabPane = document.createElement("div");
-                tabPane.className = "tab-pane" + (index === 0 ? " active" : "");
+                tabPane.className = "tab-pane " + (index === 0 ? "active" : "");
                 tabPane.style.display = index === 0 ? "block" : "none";
+                tabPane.style.maxHeight = "400px"; // scrollable if too many items
+                tabPane.style.overflowY = "auto";
+                tabPane.style.padding = "10px";
 
                 grouped[category].forEach(item => {
                     const itemDiv = document.createElement("div");
-                    itemDiv.className = "border p-2 rounded bg-light";
+                    itemDiv.className = "border rounded p-3 mb-3 bg-white shadow-sm announcement-item";
+                    itemDiv.style.transition = "transform 0.2s ease";
 
-                    const title = document.createElement("strong");
+                    itemDiv.addEventListener("mouseover", () => itemDiv.style.transform = "scale(1.02)");
+                    itemDiv.addEventListener("mouseout", () => itemDiv.style.transform = "scale(1)");
+
+                    const title = document.createElement("h5");
                     title.textContent = item.title || "No title";
-
-                    // if (category === "Notice" || category === "System Update") {
-                    //     const badge = document.createElement("span");
-                    //     badge.className = "badge ml-1 ms-2";
-
-                    //     switch (item.priority) {
-                    //         case "High":
-                    //             badge.classList.add("bg-danger");
-                    //             break;
-                    //         case "Normal":
-                    //             badge.classList.add("bg-warning", "text-dark");
-                    //             break;
-                    //         case "Low":
-                    //             badge.classList.add("bg-success");
-                    //             break;
-                    //         default:
-                    //             badge.classList.add("bg-secondary");
-                    //     }
-
-                    //     badge.textContent = item.priority.toUpperCase() || "Normal";
-                    //     title.appendChild(badge);
-                    // }
-
+                    title.className = "fw-bold mb-2";
                     itemDiv.appendChild(title);
-                    const msg = document.createElement("p");
-                    msg.style.marginBottom = "0";
+
                     if (item.message) {
+                        const msg = document.createElement("p");
+                        msg.style.margin = "0";
                         item.message.split("\n").forEach(line => {
                             const lineDiv = document.createElement("div");
                             lineDiv.textContent = line;
                             msg.appendChild(lineDiv);
                         });
+                        itemDiv.appendChild(msg);
                     }
-                    itemDiv.appendChild(msg);
 
                     tabPane.appendChild(itemDiv);
                 });
-
 
                 tabContent.appendChild(tabPane);
             });
@@ -220,24 +205,36 @@
                     pane.style.display = i === activeIndex ? "block" : "none";
                 });
                 tabNav.querySelectorAll(".nav-link").forEach((tab, i) => {
-                    tab.classList.toggle("active", i === activeIndex);
+                    if (i === activeIndex) {
+                        tab.classList.add("active", "bg-primary", "text-white");
+                        tab.classList.remove("bg-light", "text-dark");
+                    } else {
+                        tab.classList.remove("active", "bg-primary", "text-white");
+                        tab.classList.add("bg-light", "text-dark");
+                    }
                 });
             }
 
             const modal = document.getElementById("announcementsModal");
             modal.classList.add("show");
             modal.style.display = "block";
+            modal.style.opacity = 0;
             document.body.classList.add("modal-open");
 
             const backdrop = document.createElement("div");
             backdrop.className = "modal-backdrop fade show";
             document.body.appendChild(backdrop);
 
+            setTimeout(() => modal.style.opacity = 1, 50); // smooth fade-in
+
             const closeModal = () => {
-                modal.classList.remove("show");
-                modal.style.display = "none";
-                document.body.classList.remove("modal-open");
-                document.body.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+                modal.style.opacity = 0;
+                setTimeout(() => {
+                    modal.classList.remove("show");
+                    modal.style.display = "none";
+                    document.body.classList.remove("modal-open");
+                    document.body.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
+                }, 200);
             };
 
             document.getElementById("closeAnnouncementsModal").addEventListener("click", closeModal);

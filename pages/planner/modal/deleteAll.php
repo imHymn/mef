@@ -111,16 +111,10 @@
         const value = document.getElementById('filter-value').value.trim();
         console.log(column, value)
         if (!value) {
-            Swal.fire({
-                title: 'Input required',
-                text: 'Please enter a value to filter.',
-                icon: 'warning',
-                customClass: {
-                    popup: 'swal-sm'
-                }
-            });
+            showAlert('warning', 'Input required', 'Please enter a value to filter.');
             return;
         }
+
 
 
         // Filter current data based on selected field
@@ -130,14 +124,7 @@
         });
 
         if (matches.length === 0) {
-            Swal.fire({
-                title: 'No matches',
-                text: 'No entries found for that filter.',
-                icon: 'info',
-                customClass: {
-                    popup: 'swal-sm'
-                }
-            });
+            showAlert('info', 'No matches', 'No entries found for that filter.');
             return;
         }
 
@@ -172,29 +159,16 @@
                     .then(res => res.json())
                     .then(response => {
                         if (response.success) {
-                            Swal.fire({
-                                title: 'Deleted!',
-                                text: 'Filtered entries deleted.',
-                                icon: 'success',
-                                customClass: {
-                                    popup: 'swal-sm'
-                                }
-                            });
+                            showAlert('success', 'Deleted!', 'Filtered entries deleted.');
 
                             // Update your filtered data
                             filteredData = filteredData.filter(item => !idsToDelete.includes(item.id));
                             paginator.setData(filteredData);
 
                         } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: response.message || 'Delete failed.',
-                                icon: 'error',
-                                customClass: {
-                                    popup: 'swal-sm'
-                                }
-                            });
+                            showAlert('error', 'Error!', response.message || 'Delete failed.');
                         }
+
                     });
             }
         });

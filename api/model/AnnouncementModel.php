@@ -10,7 +10,7 @@ class AnnouncementModel
     }
     public function getAnnouncement()
     {
-        $sql = "SELECT * FROM announcements WHERE deleted_at IS NULL ORDER BY id DESC ";
+        $sql = "SELECT * FROM announcements WHERE deleted_at IS NULL ORDER BY id ASC ";
         return $this->db->Select($sql);
     }
     public function createAnnouncement($title, $message, $category, $priority, $status, $start_date, $end_date, $created_at, $updated_at)

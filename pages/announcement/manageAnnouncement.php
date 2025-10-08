@@ -162,9 +162,9 @@
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonText: "Yes, delete it",
-                    cancelButtonText: "Cancel"
-                });
+                    cancelButtonText: "Cancel",
 
+                });
                 if (!confirm.isConfirmed) return;
 
                 const response = await fetch("api/deleteAnnouncement", {

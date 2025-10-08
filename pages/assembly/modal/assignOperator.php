@@ -62,12 +62,10 @@
       .then(r => r.json())
       .then(data => {
         if (!data.success) {
-          return Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load assembly tasks.'
-          });
+          showAlert('error', 'Error', 'Failed to load assembly tasks.');
+          return;
         }
+
 
         let items = (data.items || [])
           .filter(item => item.id && item.material_no && item.material_description)
@@ -155,12 +153,10 @@
       .then(r => r.json())
       .then(data => {
         if (!data.success) {
-          return Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to load stamping tasks.'
-          });
+          showAlert('error', 'Error', 'Failed to load stamping tasks.');
+          return;
         }
+
         console.log('Raw data.items:', data);
 
         let items = (data.items || [])
@@ -251,7 +247,6 @@
   }
 
   function assign(id, by_order, full_name, section) {
-    // Determine the endpoint based on section
     const url = section === 'stamping' ?
       'api/stamping/assignOperator' :
       'api/assembly/assignOperator';
@@ -270,28 +265,18 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Assigned!',
-            text: `Task #${id} has been successfully assigned to ${full_name}.`
-          }).then(() => window.location.reload());
+          showAlert('success', 'Assigned!', `Task #${id} has been successfully assigned to ${full_name}.`);
+          setTimeout(() => window.location.reload(), 2000);
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Assignment Failed',
-            text: data.message || `Failed to assign task #${id}.`
-          });
+          showAlert('error', 'Assignment Failed', data.message || `Failed to assign task #${id}.`);
         }
       })
       .catch(err => {
         console.error('Error assigning:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'An unexpected error occurred.'
-        });
+        showAlert('error', 'Error', 'An unexpected error occurred.');
       });
   }
+
 
 
 

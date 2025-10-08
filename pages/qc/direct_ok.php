@@ -240,21 +240,16 @@
             .then(res => res.json())
             .then(json => {
               if (json.success) {
-                Swal.fire({
-                  title: 'Reset!',
-                  text: 'Data has been reset.',
-                  icon: 'success',
-                  timer: 1500,
-                  showConfirmButton: false
-                });
+                showAlert('success', 'Reset!', 'Data has been reset.');
               } else {
-                Swal.fire('Error', json.message || 'Authorization failed.', 'error');
+                showAlert('error', 'Error', json.message || 'Authorization failed.');
               }
             })
             .catch(err => {
-              Swal.fire('Error', 'Something went wrong.', 'error');
               console.error(err);
+              showAlert('error', 'Error', 'Something went wrong.');
             });
+
         }
       });
     }

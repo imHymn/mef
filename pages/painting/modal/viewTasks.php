@@ -49,13 +49,10 @@
             .then(res => res.json())
             .then(data => {
                 if (!data.success) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Failed to load delivery form items.'
-                    });
+                    showAlert('error', 'Error', data.message || 'Failed to load delivery form items.');
                     return;
                 }
+
 
                 let items = (data.items || []).filter(item => item.id && item.material_no && item.material_description);
 
@@ -140,11 +137,8 @@
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Network Error',
-                    text: 'Please try again.'
-                });
+                showAlert('error', 'Network Error', 'Please try again.');
+
             });
     }
 

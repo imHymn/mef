@@ -19,6 +19,35 @@ class StampingModel
         $user = $this->db->SelectOne($sql, $params);
         return $user ?: null;
     }
+    public function getLatestReferenceNo()
+    {
+        // Step 1: Get today's date in Ymd format (e.g. 20251008)
+        $todayPrefix = date('Ymd');
+
+        // Step 2: Query to get the latest reference_no for today
+        $sql = "SELECT reference_no 
+            FROM issued_rawmaterials 
+            WHERE reference_no LIKE :prefix 
+            ORDER BY reference_no DESC 
+            LIMIT 1";
+
+        $result = $this->db->SelectOne($sql, [':prefix' => $todayPrefix . '-%']);
+
+        // Step 3: If found, increment the numeric part
+        if ($result && isset($result['reference_no'])) {
+            $lastRef = $result['reference_no']; // e.g. 20251008-0002
+            $parts = explode('-', $lastRef);
+            $lastNum = isset($parts[1]) ? intval($parts[1]) : 0;
+            $newNum = str_pad($lastNum + 1, 4, '0', STR_PAD_LEFT);
+            $newRef = $todayPrefix . '-' . $newNum;
+        } else {
+            // Step 4: If no existing reference for today, start from 0001
+            $newRef = $todayPrefix . '-0001';
+        }
+
+        return $newRef;
+    }
+
     public function resetStamping($id)
     {
         $updateSql = "UPDATE stamping SET time_in = NULL, time_out = NULL, person_incharge = NULL WHERE id = :id";

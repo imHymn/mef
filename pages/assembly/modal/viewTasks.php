@@ -114,11 +114,7 @@
             })
             .catch(err => {
                 console.error(err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: err.message
-                });
+                showAlert('error', 'Error', 'Unexpected error occurred.');
             });
     }
 
