@@ -23,7 +23,7 @@
                     <!-- Message -->
                     <div class="form-group mb-3">
                         <label for="message" class="font-weight-semibold">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="3" maxlength="255" placeholder="Write your announcement message..." required></textarea>
+                        <textarea class="form-control" id="message" name="message" rows="3" placeholder="Write your announcement message..." required></textarea>
                     </div>
 
                     <!-- Category -->

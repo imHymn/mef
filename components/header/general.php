@@ -129,5 +129,10 @@ if ($role === 'rm warehouse') {
         <i class="link-icon" data-feather="clock"></i>
         <span class="link-title">Issuance History</span>
       </a>
+    </li>  <li class="nav-item">
+      <a href="?page_active=rm_inventory" class="nav-link" data-page="rm_inventory">
+        <i class="link-icon" data-feather="clock"></i>
+        <span class="link-title">Raw Materials Inventory</span>
+      </a>
     </li>';
 }

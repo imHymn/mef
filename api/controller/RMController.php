@@ -11,13 +11,12 @@ class RMController
         $this->db = new DatabaseClass();
         $this->rmModel = new RMModel($this->db);
     }
+
     public function getIssuedComponents()
     {
 
         $model = $_GET['model'] ?? '';
-
         $results = $this->rmModel->getIssuedComponents($model);
-
         echo json_encode([
             'status' => 'success',
             'data' => $results
@@ -164,18 +163,31 @@ class RMController
                     }
                 }
 
-                $this->rmModel->updateIssuedRawmaterials($input['id'], $input['quantity']);
+
+                $hasNullPair = false;
+                foreach ($pairedMaterials as $pair) {
+                    if ($pair['pair'] === null) {
+                        $hasNullPair = true;
+                        break;
+                    }
+                }
+
+                if ($hasNullPair) {
+                    $this->rmModel->updateIssuedRawmaterials($input);
+                } else {
+                    $this->rmModel->updateIssuedRawmaterialsByPairs($pairedMaterials, $input);
+                }
 
                 $this->db->commit();
 
                 echo json_encode([
                     'status'         => 'success',
                     'message'        => 'All paired records inserted and updated successfully',
-                    'quantity'       => $input['quantity'],
-                    'id'             => $input['id'],
+                    'input'       => $input,
+
                     'paired'         => $pairedMaterials,
                     'flattenedStages' => $flattenedStages,
-                    'stage_name'     => $input['stage_name']
+
                 ]);
             } catch (Exception $e) {
                 $this->db->rollBack();

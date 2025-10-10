@@ -127,6 +127,7 @@ class ModelDrawer {
         this.model = item.model;
         this.onModelChange(this.model);
         localStorage.setItem("selectedModel", this.model);
+localStorage.setItem("selectedCustomer", item.customer_name);
 
         btnGroup.querySelectorAll("button").forEach((b) => {
           b.classList.remove("active", "bg-primary", "text-white");

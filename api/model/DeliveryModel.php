@@ -43,7 +43,6 @@ class DeliveryModel
 
         $affectedRows = 0;
 
-        // 2️⃣ Update component stock if stamping
         if (!empty($input['process']) && strtolower($input['process']) === 'stamping') {
             $this->updateComponentsStock(
                 $input['material_no'],

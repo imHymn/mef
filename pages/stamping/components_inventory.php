@@ -317,9 +317,9 @@
         .then(response => {
           if (response.status === 'success') {
             showAlert('success', 'Success', response.message || 'Issued successfully.');
-            setTimeout(() => {
-              window.location.reload();
-            }, 2000); // matches your auto-close timer
+            // setTimeout(() => {
+            //   window.location.reload();
+            // }, 2000); // matches your auto-close timer
           } else {
             showAlert('error', 'Error', response.message || 'Issue failed.');
           }
