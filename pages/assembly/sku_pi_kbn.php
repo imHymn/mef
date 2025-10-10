@@ -545,7 +545,7 @@
         .then(data => {
           if (data.success) {
             showAlert('success', 'Success', 'Assembly record unassigned successfully.');
-            setTimeout(() => window.location.reload(), 2000); // wait for alert before reload
+            // setTimeout(() => window.location.reload(), 2000); // wait for alert before reload
           } else {
             showAlert('error', 'Error', data.message || 'Failed to unassign assembly record.');
           }

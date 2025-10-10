@@ -13,6 +13,12 @@ class AssemblyModel
         $sql = "SELECT * FROM `components_inventory` WHERE material_no ='$material_no'";
         return $this->db->Select($sql);
     }
+    public function getSKUProcesses($model)
+    {
+
+        $sql = "SELECT material_no,material_description,assembly_processtime,sub_component,assembly_section,assembly_process,manpower,total_process FROM material_inventory WHERE model=:model";
+        return $this->db->Select($sql, [':model' => $model]);
+    }
     public function getData_toassign(string $cutoff, string $model): array
     {
         // DELIVERY FORMS

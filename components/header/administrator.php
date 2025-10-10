@@ -160,7 +160,7 @@ if ($role === 'administrator') {
               <a href="?page_active=assembly_pi_kbn_sku" class="nav-link" data-page="assembly_pi_kbn_sku">
                 PI KBN              </a>
             </li>
-          
+      
           </ul>
         </div>
       </li>
@@ -262,6 +262,7 @@ if ($role === 'administrator') {
           <li class="nav-item">
             <a href="?page_active=issued_history" class="nav-link" data-page="issued_history">Issued History</a>
           </li>
+    
         </ul>
       </div>
     </li>';
@@ -413,6 +414,39 @@ if ($role === 'administrator') {
       <li class="nav-item">
         <a href="?page_active=announcement_list" class="nav-link" data-page="announcement_list">
           Manage Announcements
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link d-flex justify-content-between align-items-center" 
+     data-toggle="collapse" 
+     href="#skuMenu" 
+     role="button" 
+     aria-expanded="false" 
+     aria-controls="skuMenu">
+    
+    <i class="link-icon" data-feather="box"></i>
+    
+    <span class="link-title">Masterlist Data</span>
+    
+    <i class="link-arrow" data-feather="chevron-down"></i>
+  </a>
+
+  <div class="collapse" id="skuMenu">
+    <ul class="nav sub-menu">
+      <li class="nav-item">
+        <a href="?page_active=manage_sku" class="nav-link" data-page="manage_sku">
+          SKU Management
+        </a>
+      </li><li class="nav-item">
+        <a href="?page_active=manage_component" class="nav-link" data-page="manage_component">
+          Component Management
+        </a>
+      </li><li class="nav-item">
+        <a href="?page_active=manage_rm" class="nav-link" data-page="manage_rm">
+          Raw Material Management
         </a>
       </li>
     </ul>

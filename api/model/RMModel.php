@@ -8,6 +8,69 @@ class RMModel
     {
         $this->db = $db;
     }
+
+
+
+
+    // public function getRMInventory($model)
+    // {
+    //     $sql = "
+    // (
+    //     SELECT
+    //         r.material_no AS rm_material_no,
+    //         r.material_description AS rm_material_description,
+    //         r.component_name AS rm_component_name,
+    //         r.usage AS rm_usage,
+    //         c.material_no AS comp_material_no,
+    //         c.components_name AS comp_component_name,
+    //         c.usage_type AS comp_usage_type,
+    //         CASE
+    //             WHEN c.material_no IS NULL THEN 'Missing in Components'
+    //             ELSE 'Matched'
+    //         END AS match_status
+    //     FROM (
+    //         SELECT DISTINCT material_no, material_description, component_name, `usage`, model
+    //         FROM rawmaterials_inventory
+    //     ) r
+    //     LEFT JOIN (
+    //         SELECT DISTINCT material_no, components_name, usage_type
+    //         FROM components_inventory
+    //     ) c
+    //         ON r.material_no = c.material_no
+    //         AND r.component_name = c.components_name
+    //     WHERE r.model = :model
+    // )
+    // UNION ALL
+    // (
+    //     SELECT
+    //         r.material_no AS rm_material_no,
+    //         r.material_description AS rm_material_description,
+    //         r.component_name AS rm_component_name,
+    //         r.usage AS rm_usage,
+    //         c.material_no AS comp_material_no,
+    //         c.components_name AS comp_component_name,
+    //         c.usage_type AS comp_usage_type,
+    //         'Missing in Raw Materials' AS match_status
+    //     FROM (
+    //         SELECT DISTINCT material_no, material_description, component_name, `usage`, model
+    //         FROM rawmaterials_inventory
+    //     ) r
+    //     RIGHT JOIN (
+    //         SELECT DISTINCT material_no, components_name, usage_type, model
+    //         FROM components_inventory
+    //     ) c
+    //         ON r.material_no = c.material_no
+    //         AND r.component_name = c.components_name
+    //     WHERE r.material_no IS NULL
+    //     AND c.model = :model
+    // )
+    // ";
+
+    //     $params = [':model' => $model];
+    //     return $this->db->Select($sql, $params);
+    // }
+
+
     public function getIssuedComponents($model)
     {
         $strictMaterialFilter = true; // always filter by material_no for issued row
@@ -314,7 +377,7 @@ VALUES
 
             $stageIndex = $i + 1;
             $manpower = $flattenedStages[$i]['manpower'] ?? 1;
-            $rowsToInsert = $manpower === 2 ? 2 : 1; // duplicate if manpower is 2
+            $rowsToInsert = max(1, (int)($flattenedStages[$i]['manpower'] ?? 1));
 
             for ($dup = 0; $dup < $rowsToInsert; $dup++) {
                 $referenceNo = $dateToday . '-' . str_pad($existingCount + $stageIndex + $dup, 4, '0', STR_PAD_LEFT);
@@ -350,22 +413,109 @@ VALUES
 
         return true;
     }
-
-    public function updateIssuedRawmaterials($id, $quantity)
+    public function updateIssuedRawmaterialsByPairs(array $pairedMaterials, array $input)
     {
+        // Extract common values from $input
+        $quantity      = $input['quantity'] ?? 0;
+        $reference_no  = $input['reference_no'] ?? null;
+        $model         = $input['model'] ?? null;
+        $process       = $input['process'] ?? 'stamping';
+        $type          = $input['type'] ?? null;
+
+        foreach ($pairedMaterials as $pair) {
+            $sqlUpdate = "UPDATE issued_rawmaterials 
+            SET delivered_at = NOW(), rm_quantity = :quantity, `status` = :status
+            WHERE material_no = :material_no AND component_name = :component_name";
+
+            $params = [
+                ':material_no'    => $pair['material_no'],
+                ':component_name' => $pair['component_name'],
+                ':quantity'       => $quantity,
+                ':status'         => 'done'
+            ];
+
+            $updated = $this->db->Update($sqlUpdate, $params);
+
+            // ⚡ If no existing row, insert a new one
+            if (!$updated) {
+                $sqlInsert = "INSERT INTO issued_rawmaterials 
+                (reference_no, material_no, component_name, model, quantity, rm_quantity, `status`, process, issued_at, delivered_at, pair, type)
+                VALUES (:reference_no, :material_no, :component_name, :model, :quantity, :rm_quantity, :status, :process, NOW(), NOW(), :pair, :type)";
+
+                $insertParams = [
+                    ':reference_no'   => $reference_no,
+                    ':material_no'    => $pair['material_no'],
+                    ':component_name' => $pair['component_name'],
+                    ':model'          => $pair['model'] ?? $model,
+                    ':quantity'       => $quantity,
+                    ':rm_quantity'    => $quantity,
+                    ':status'         => 'done',
+                    ':process'        => $pair['process'] ?? $process,
+                    ':pair'           => $pair['pair'] ?? null,
+                    ':type'           => $pair['type'] ?? $type
+                ];
+
+                $this->db->Insert($sqlInsert, $insertParams);
+            }
+        }
+
+        return true;
+    }
+
+
+
+    public function updateIssuedRawmaterials(array $input)
+    {
+        // Extract values safely from $input
+        $id             = $input['id'] ?? null;
+        $quantity       = $input['quantity'] ?? 0;
+        $material_no    = $input['material_no'] ?? null;
+        $component_name = $input['component_name'] ?? null;
+        $model          = $input['model'] ?? null;
+        $reference_no   = $input['reference_no'] ?? null;
+        $process        = $input['process'] ?? 'stamping';
+        $type           = $input['type'] ?? null;
+        $pair           = $input['pair'] ?? null;
+
+        // ✅ 1️⃣ Attempt to update existing record by ID
         $sql = "UPDATE issued_rawmaterials 
-            SET delivered_at = NOW() ,rm_quantity =:quantity,`status`=:status
-            WHERE id = :id 
-           ";
+            SET delivered_at = NOW(), rm_quantity = :quantity, `status` = :status
+            WHERE id = :id";
 
         $params = [
-            ':id' => $id,
-            'status' => 'done',
+            ':id'       => $id,
+            ':status'   => 'done',
             ':quantity' => $quantity
         ];
+        $updated = $this->db->Update($sql, $params);
 
-        return $this->db->Update($sql, $params);
+        // ✅ If no record updated, insert fallback
+        if (!$updated) {
+            $sqlInsert = "INSERT INTO issued_rawmaterials 
+            (reference_no, material_no, component_name, model, quantity, rm_quantity, `status`, process, issued_at, delivered_at, pair, type)
+            VALUES (:reference_no, :material_no, :component_name, :model, :quantity, :rm_quantity, :status, :process, NOW(), NOW(), :pair, :type)";
+
+            $insertParams = [
+                ':reference_no'   => $reference_no,
+                ':material_no'    => $material_no,
+                ':component_name' => $component_name,
+                ':model'          => $model,
+                ':quantity'       => $quantity,
+                ':rm_quantity'    => $quantity,
+                ':status'         => 'done',
+                ':process'        => $process,
+                ':pair'           => $pair,
+                ':type'           => $type
+            ];
+
+            $this->db->Insert($sqlInsert, $insertParams);
+        }
+
+        return true;
     }
+
+
+
     public function getNextBatchNumber(): int
     {
         $sql = "SELECT MAX(batch) as max_batch 

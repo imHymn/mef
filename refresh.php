@@ -21,13 +21,11 @@ try {
     $sql2 = "UPDATE material_inventory SET quantity = 200";
     $db->Update($sql2);
 
-    // Update material_inventory if material_description is CLIP 25 or CLIP 60
     $sql3 = "UPDATE material_inventory 
                  SET quantity = 10000 
                  WHERE material_description IN ('CLIP 25', 'CLIP 60')";
     $db->Update($sql3);
 
-    // Update components_inventory if components_name is CLIP 25 or CLIP 60
     $sql4 = "
         UPDATE components_inventory
         SET 
@@ -40,7 +38,6 @@ try {
         WHERE components_name IN ('CLIP 25', 'CLIP 60')
     ";
     $db->Update($sql4);
-
     // 🔹 Reset inventories for specific models (MILLIARD, APS, KOMYO)
     $sql5 = "UPDATE components_inventory 
                  SET actual_inventory = 0 
@@ -52,6 +49,11 @@ try {
                  WHERE model IN ('MILLIARD', 'APS', 'KOMYO')";
     $db->Update($sql6);
 
+    $sql7 = "
+       UPDATE `components_inventory` SET maximum_inventory=450*usage_type,normal=360*usage_type,reorder=270*usage_type,minimum=180*usage_type,critical=90*usage_type;
+ 
+    ";
+    $db->Update($sql7);
     // Truncate tables
     $tablesToTruncate = [
         'delivery_form',

@@ -19,6 +19,7 @@ require_once __DIR__ . '/controller/FGController.php';
 require_once __DIR__ . '/controller/ExportController.php';
 require_once __DIR__ . '/controller/FinishingController.php';
 require_once __DIR__ . '/controller/AnnouncementController.php';
+require_once __DIR__ . '/controller/MasterlistDataController.php';
 $userController = new AccountController();
 $reusableController = new ReusableController();
 $plannerController = new PlannerController();
@@ -31,6 +32,8 @@ $exportController = new ExportController();
 $finishingController = new FinishingController();
 $stampingController = new StampingController();
 $announcementController = new AnnouncementController();
+$masterlistDataController = new MasterlistDataController();
+
 // REUSABLE
 $router->get('/reusable/getCustomerandModel', 'ReusableController@getCustomerandModel');
 $router->post('/reusable/updateAccountMinimal', 'ReusableController@updateAccountMinimal');
@@ -53,7 +56,6 @@ $router->get('/accounts/getQCAccounts', 'AccountController@getQCAccounts');
 $router->get('/accounts/getStampingAccounts', 'AccountController@getStampingAccounts');
 $router->get('/accounts/getFinishingAccounts', 'AccountController@getFinishingAccounts');
 $router->get('/accounts/getPaintingAccounts', 'AccountController@getPaintingAccounts');
-
 $router->get('/accounts/updateQRGenerated', 'AccountController@updateQRGenerated');
 $router->post('/accounts/updateAccount', 'AccountController@updateAccount');
 $router->post('/accounts/deleteAccount', 'AccountController@deleteAccount');
@@ -63,11 +65,11 @@ $router->post('/accounts/changePassword', 'AccountController@changePassword');
 $router->get('/planner/getMaterial', 'PlannerController@getMaterial');
 $router->get('/planner/getFormHistory', 'PlannerController@getFormHistory');
 $router->get('/planner/getComponents', 'PlannerController@getComponents');
+$router->get('/planner/getPreviousLot', 'PlannerController@getPreviousLot');
 $router->post('/planner/submitForm', 'PlannerController@submitForm');
 $router->post('/planner/submitForm_allCustomer', 'PlannerController@submitForm_allCustomer');
 $router->post('/planner/submitForm_specificCustomer', 'PlannerController@submitForm_specificCustomer');
 $router->post('/planner/deleteMultipleForm', 'PlannerController@deleteMultipleForm');
-$router->get('/planner/getPreviousLot', 'PlannerController@getPreviousLot');
 
 // DELIVERY
 $router->get('/delivery/getPendingDelivery', 'DeliveryController@getPendingDelivery');
@@ -82,7 +84,6 @@ $router->get('/assembly/getAllAssemblyData', 'AssemblyController@getAllAssemblyD
 $router->get('/assembly/getData_toassign', 'AssemblyController@getData_toassign');
 $router->get('/assembly/getAllData_assigned', 'AssemblyController@getAllData_assigned');
 $router->post('/assembly/getAllModelData_assigned', 'AssemblyController@getAllModelData_assigned');
-
 $router->post('/assembly/getSpecificData_assigned', 'AssemblyController@getSpecificData_assigned');
 $router->post('/assembly/assignOperator', 'AssemblyController@assignOperator');
 $router->post('/assembly/getMaterialComponent', 'AssemblyController@getMaterialComponent');
@@ -93,8 +94,6 @@ $router->post('/assembly/timeoutOperator', 'AssemblyController@timeoutOperator')
 $router->get('/qc/getTodoList', 'QCController@getTodoList');
 $router->get('/qc/getRework', 'QCController@getRework');
 $router->get('/qc/getAllQCData', 'QCController@getAllQCData');
-
-
 $router->post('/qc/timeinOperator', 'QCController@timeinOperator');
 $router->post('/qc/timeoutOperator', 'QCController@timeoutOperator');
 $router->post('/qc/timein_reworkOperator', 'QCController@timein_reworkOperator');
@@ -108,7 +107,6 @@ $router->post('/rm/getRMStocks', 'RMController@getRMStocks');
 $router->post('/rm/issueRM', 'RMController@issueRM');
 $router->post('/rm/deleteIssued', 'RMController@deleteIssued');
 
-
 // STAMPING
 $router->get('/stamping/getLatestReferenceNo', 'StampingController@getLatestReferenceNo');
 $router->get('/stamping/getMachines', 'StampingController@getMachines');
@@ -116,7 +114,6 @@ $router->get('/stamping/getData_toassign', 'StampingController@getData_toassign'
 $router->get('/stamping/getAllData_assigned', 'StampingController@getAllData_assigned');
 $router->get('/stamping/getComponentInventory', 'StampingController@getComponentInventory');
 $router->get('/stamping/getAllStampingData', 'StampingController@getAllStampingData');
-
 $router->post('/stamping/getAllModelData_assigned', 'StampingController@getAllModelData_assigned');
 $router->post('/stamping/getSpecificData_assigned', 'StampingController@getSpecificData_assigned');
 $router->post('/stamping/assignOperator', 'StampingController@assignOperator');
@@ -125,19 +122,29 @@ $router->post('/stamping/timeinOperator', 'StampingController@timeinOperator');
 $router->post('/stamping/timeoutOperator', 'StampingController@timeoutOperator');
 
 // FINISHING
+$router->get('/finishing/getAllData_assigned', 'FinishingController@getAllData_assigned');
+$router->get('/finishing/getData_toassign', 'FinishingController@getData_toassign');
 $router->post('/finishing/getSpecificData_assigned', 'FinishingController@getSpecificData_assigned');
 $router->post('/finishing/assignOperator', 'FinishingController@assignOperator');
 $router->post('/finishing/getAllModelData_assigned', 'FinishingController@getAllModelData_assigned');
-$router->get('/finishing/getAllData_assigned', 'FinishingController@getAllData_assigned');
-$router->get('/finishing/getData_toassign', 'FinishingController@getData_toassign');
 $router->post('/finishing/timeinOperator', 'FinishingController@timeinOperator');
 $router->post('/finishing/timeoutOperator', 'FinishingController@timeoutOperator');
 
 // FG WAREHOUSE
 $router->get('/fg/getReadyforPullOut', 'FGController@getReadyforPullOut');
-$router->post('/fg/PullOut', 'FGController@PullOut');
 $router->get('/fg/getAllComponents', 'FGController@getAllComponents');
 $router->get('/fg/getPulledoutHistory', 'FGController@getPulledoutHistory');
+$router->post('/fg/PullOut', 'FGController@PullOut');
+
+// MASTERLIST DATA
+$router->get('/masterlist/getRMData', 'MasterlistDataController@getRMData');
+$router->get('/masterlist/getSKUData', 'MasterlistDataController@getSKUData');
+$router->get('/masterlist/getComponentData', 'MasterlistDataController@getComponentData');
+
+$router->post('/masterlist/updateComponent', 'MasterlistDataController@updateComponent');
+$router->post('/masterlist/updateSKU', 'MasterlistDataController@updateSKU');
+
+
 
 // Export Excel
 $router->post('/export/exportQCExcel', 'ExportController@exportQCExcel');

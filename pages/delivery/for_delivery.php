@@ -265,7 +265,6 @@
 
                         console.log('Payload to be sent:', payload);
 
-                        // ✅ Decide which API endpoint to use
                         const url = specialModels.includes(modelKey) ?
                             'api/delivery/component_delivery' :
                             'api/delivery/sku_delivery';
@@ -279,12 +278,10 @@
                             })
                             .then(r => r.json())
                             .then(res => {
-                                if (res.status === 'success') {
-                                    showAlert('success', 'Success', res.message || 'Action completed successfully.')
-                                        .then(() => {
-                                            item.quantity -= qty;
-                                            window.location.reload();
-                                        });
+                                if (res.status === "success") {
+                                    showAlert('success', 'Success', res.message || 'Action completed successfully.');
+                                    item.quantity -= qty;
+                                    // window.location.reload();
                                 } else {
                                     showAlert('error', 'Error', res.message || 'Action failed.');
                                 }

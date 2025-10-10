@@ -24,7 +24,7 @@
 
                 <div class="form-group mb-3">
                     <label for="edit_message">Message</label>
-                    <textarea class="form-control" id="edit_message" name="message" rows="3" maxlength="255" required></textarea>
+                    <textarea class="form-control" id="edit_message" name="message" rows="3" required></textarea>
                 </div>
 
                 <div class="form-group mb-3">

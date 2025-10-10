@@ -33,12 +33,14 @@ $pageMap = [
         'assembly_manpower_efficiency' => 'manpower_efficiency.php',
         'assembly_sectional_efficiency' => 'sectional_efficiency.php',
         'assembly_assign_pi_components' => 'component_pi_assign.php',
-        'assembly_pi_kbn_component' => 'component_pi_kbn.php'
+        'assembly_pi_kbn_component' => 'component_pi_kbn.php',
+
     ],
     'rm' => [
-        'issue' => 'issue.php',
+
         'issue_rm' => 'issue_rm.php',
-        'issued_history' => 'issued_history.php'
+        'issued_history' => 'issued_history.php',
+
     ],
     'stamping' => [
         'stamping_accounts' => 'accounts.php',
@@ -82,7 +84,13 @@ $pageMap = [
     ],
     'announcement' => [
         'announcement_list' => 'manageAnnouncement.php'
-    ]
+    ],
+    'masterlistData' => [
+        'manage_sku' => 'manage_sku.php',
+        'manage_component' => 'manage_component.php',
+        'manage_rm' => 'manage_rm.php'
+    ],
+
 
 
 

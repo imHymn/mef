@@ -11,6 +11,12 @@ class AssemblyController
         $this->db = new DatabaseClass(); // Store as property
         $this->assemblyModel = new AssemblyModel($this->db);
     }
+    public function getSKUProcesses()
+    {
+        $model = $_GET['model'] ?? null;
+        $skuProcesses = $this->assemblyModel->getSKUProcesses($model);
+        echo json_encode($skuProcesses);
+    }
     public function normalizeArray($value)
     {
         if (is_string($value)) {
