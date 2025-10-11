@@ -216,7 +216,7 @@ if ($role === 'supervisor' && in_array('finishing', $section, true)) {
       <!-- SKU Group -->
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#finishingSkuMenu" role="button" aria-expanded="false" aria-controls="finishingSkuMenu">
-          Assembly <i class="link-arrow" data-feather="chevron-down"></i>
+          SKU <i class="link-arrow" data-feather="chevron-down"></i>
         </a>
         <div class="collapse" id="finishingSkuMenu">
           <ul class="nav sub-menu" style="padding-left: 20px;">
@@ -233,7 +233,7 @@ if ($role === 'supervisor' && in_array('finishing', $section, true)) {
       <!-- Component Group -->
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#finishingComponentMenu" role="button" aria-expanded="false" aria-controls="finishingComponentMenu">
-          Stamping <i class="link-arrow" data-feather="chevron-down"></i>
+          Component <i class="link-arrow" data-feather="chevron-down"></i>
         </a>
         <div class="collapse" id="finishingComponentMenu">
           <ul class="nav sub-menu" style="padding-left: 20px;">

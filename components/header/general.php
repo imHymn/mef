@@ -21,7 +21,6 @@ if ($role === 'planner') {
   </a>
 </li>
 
-<!-- Assembly SKU Group -->
 <li class="nav-item">
   <a class="nav-link" data-toggle="collapse" href="#assemblySkuMenu" role="button" aria-expanded="false" aria-controls="assemblySkuMenu">
     <i class="link-icon" data-feather="package"></i>

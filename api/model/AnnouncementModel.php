@@ -35,13 +35,13 @@ class AnnouncementModel
         return $this->db->Insert($sql, $params);
     }
 
-    public function updateAnnouncement($id, $title, $message, $category, $priority, $status, $start_date, $end_date, $updated_at)
+    public function updateAnnouncement($id, $title, $message, $category, $priority, $status, $start_date, $end_date, $updated_at, $cancel_reason = null)
     {
         $sql = "UPDATE announcements 
-            SET title = :title, message = :message, category = :category, 
-                priority = :priority, status = :status, start_date = :start_date, end_date = :end_date,
-                updated_at = :updated_at 
-            WHERE id = :id";
+        SET title = :title, message = :message, category = :category, 
+            priority = :priority, status = :status, start_date = :start_date, end_date = :end_date,
+            updated_at = :updated_at, reason = :cancel_reason
+        WHERE id = :id";
 
         $params = [
             ':id' => $id,
@@ -52,11 +52,13 @@ class AnnouncementModel
             ':status' => $status,
             ':start_date' => $start_date,
             ':end_date' => $end_date,
-            ':updated_at' => $updated_at
+            ':updated_at' => $updated_at,
+            ':cancel_reason' => $cancel_reason
         ];
 
         return $this->db->Update($sql, $params);
     }
+
 
     public function getAnnouncementById($id)
     {

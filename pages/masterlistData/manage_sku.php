@@ -24,54 +24,49 @@
     </nav>
 
     <div class="row">
-        <div class="col-md-12 grid-margin stretch-card">
+        <div class="col-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="card-title mb-0">SKU Information</h6>
+                    <!-- Header with title and last-updated -->
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
+                        <h6 class="card-title mb-2 mb-md-0">SKU Information</h6>
                         <small id="last-updated" class="text-muted" style="font-size:13px;"></small>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-between w-100 mb-2">
+                    <!-- Filter and Add button -->
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between w-100 mb-2 gap-2">
                         <input
                             type="text"
                             id="filter-input"
-                            class="form-control form-control-sm me-2"
+                            class="form-control form-control-sm"
                             style="max-width: 300px;"
                             placeholder="Type to filter..." />
 
-                        <!-- Inline Edit button on the right -->
-                        <div class="d-flex justify-content-end mb-2">
-                            <button class="btn btn-success btn-sm add-btn">Add New SKU</button>
-                        </div>
-
+                        <button class="btn btn-success btn-sm add-btn">Add New SKU</button>
                     </div>
 
+                    <!-- Responsive scrollable table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover" style="table-layout: fixed; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%; text-align: center;">Material No <span class="sort-icon"></span></th>
+                                    <th style="width: 20%; text-align: center;">Material Name <span class="sort-icon"></span></th>
+                                    <th style="width: 10%; text-align: center;">Quantity <span class="sort-icon"></span></th>
+                                    <th style="width: 15%; text-align: center;">Action <span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-body"></tbody>
+                        </table>
+                    </div>
 
-
-
-                    <table class="custom-hover table" style="table-layout: fixed; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 15%; text-align: center;">Material No <span class="sort-icon"></span></th>
-                                <th style="width: 25%; text-align: center;">Material Name <span class="sort-icon"></span></th>
-                                <th style="width: 10%; text-align: center;">Quantity<span class="sort-icon"></span></th>
-                                <th style="width: 10%; text-align: center;">Action<span class="sort-icon"></span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-body"></tbody>
-                    </table>
-
-
+                    <!-- Pagination -->
                     <div id="pagination" class="mt-3 d-flex justify-content-center"></div>
-
-
-
-
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         const dataBody = document.getElementById('data-body');
         const filterColumn = document.getElementById('filter-column');
@@ -86,6 +81,13 @@
         let componentsData = []; // global flattened data
 
         document.addEventListener('DOMContentLoaded', () => {
+            const userRole = "<?= $role ?>"; // your PHP role
+            const addBtn = document.querySelector(".add-btn");
+
+            if (addBtn && userRole.toLowerCase() !== "administrator") {
+                addBtn.disabled = true;
+                addBtn.title = "Only administrators can add new SKUs";
+            }
             const addSkuBtn = document.querySelector('.add-btn');
             if (addSkuBtn) {
                 addSkuBtn.addEventListener('click', () => {
@@ -93,6 +95,58 @@
                     else console.warn('openAddModal not found');
                 });
             }
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.delete-btn');
+                if (!btn) return;
+
+                let item = null;
+                try {
+                    const raw = decodeURIComponent(btn.getAttribute('data-item'));
+                    item = JSON.parse(raw);
+                } catch (err) {
+                    console.error('Failed to parse data-item:', err);
+                    showAlert('error', 'Invalid Data', 'Unable to identify the selected SKU for deletion.');
+                    return;
+                }
+
+                const confirmResult = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Delete Confirmation',
+                    text: `Are you sure you want to delete SKU "${item.material_no}"?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#d33',
+                });
+
+                if (!confirmResult.isConfirmed) return;
+                console.log(item)
+                try {
+                    const res = await fetch('api/masterlist/deleteSKU', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: item.id
+                        }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        showAlert('success', 'Deleted!', 'SKU has been removed successfully.');
+
+                    } else {
+                        showAlert('error', 'Delete Failed', data.message || 'An error occurred while deleting.');
+                    }
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    showAlert('error', 'Error', 'Unable to connect to the server.');
+                }
+            });
+
+
         });
 
 
@@ -138,6 +192,8 @@
             dataBody.innerHTML = '';
             const query = filterInput.value.toLowerCase();
 
+            const isAdmin = userRole.toLowerCase() === "administrator";
+            const disabledAttr = isAdmin ? "" : "disabled";
             data.forEach(item => {
                 const row = document.createElement('tr');
                 const itemJson = encodeURIComponent(JSON.stringify(item));
@@ -150,13 +206,12 @@
      <button class="btn btn-sm btn-info view-btn" data-item='${itemJson}'>
         View
     </button>
-    <button class="btn btn-sm btn-primary edit-btn" data-item='${itemJson}'>
+ <button class="btn btn-sm btn-primary edit-btn" data-item='${itemJson}' ${disabledAttr}>
         Edit
-    </button>
-   
-    <button class="btn btn-sm btn-danger delete-btn" data-item='${itemJson}'>
+      </button>
+      <button class="btn btn-sm btn-danger delete-btn" data-item='${itemJson}' ${disabledAttr}>
         Delete
-    </button>
+      </button>
 </td>
 
         `;

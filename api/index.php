@@ -137,13 +137,28 @@ $router->get('/fg/getPulledoutHistory', 'FGController@getPulledoutHistory');
 $router->post('/fg/PullOut', 'FGController@PullOut');
 
 // MASTERLIST DATA
+
+$router->get('/masterlist/getSkuMaterialNo', 'MasterlistDataController@getSkuMaterialNo');
+$router->get('/masterlist/getRMComponent', 'MasterlistDataController@getRMComponent');
+
+
+
+
 $router->get('/masterlist/getRMData', 'MasterlistDataController@getRMData');
 $router->get('/masterlist/getSKUData', 'MasterlistDataController@getSKUData');
 $router->get('/masterlist/getComponentData', 'MasterlistDataController@getComponentData');
 
+$router->post('/masterlist/addComponent', 'MasterlistDataController@addComponent');
+$router->post('/masterlist/addSKU', 'MasterlistDataController@addSKU');
+$router->post('/masterlist/addRM', 'MasterlistDataController@addRM');
+
 $router->post('/masterlist/updateComponent', 'MasterlistDataController@updateComponent');
 $router->post('/masterlist/updateSKU', 'MasterlistDataController@updateSKU');
+$router->post('/masterlist/updateRM', 'MasterlistDataController@updateRM');
 
+$router->post('/masterlist/deleteSKU', 'MasterlistDataController@deleteSKU');
+$router->post('/masterlist/deleteComponent', 'MasterlistDataController@deleteComponent');
+$router->post('/masterlist/deleteRM', 'MasterlistDataController@deleteRM');
 
 
 // Export Excel

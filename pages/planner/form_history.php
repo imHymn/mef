@@ -31,27 +31,24 @@
     </nav>
 
     <div class="row">
-        <div class="col-md-12 grid-margin stretch-card">
+        <div class="col-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between ">
-                        <h6 class="card-title mb-0 d-flex align-items-center gap-2">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3">
+                        <h6 class="card-title mb-2 mb-md-0 d-flex align-items-center gap-2">
                             Form History
-
                         </h6>
                         <small id="last-updated" class="text-muted" style="font-size:13px;"></small>
                     </div>
 
-
-                    <div class="row mb-3 align-items-end ">
-
-                        <div class="col-md-3 d-flex ">
+                    <div class="row mb-3 align-items-end g-2">
+                        <!-- Left: Search input -->
+                        <div class="col-md-3">
                             <input type="text" id="search-input" class="form-control" placeholder="Type to filter..." />
-
                         </div>
 
-                        <!-- Right Section: From and To Dates -->
-                        <div class="col-md-9 d-flex justify-content-end gap-2 ms-auto">
+                        <!-- Right: From and To Dates -->
+                        <div class="col-md-9 d-flex justify-content-end gap-2">
                             <div>
                                 <label for="from-date" class="form-label">From</label>
                                 <input type="date" id="from-date" class="form-control" />
@@ -64,37 +61,33 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="custom-hover table">
-                            <thead>
+                        <table class="table table-hover table-sm custom-hover">
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="material-no">Material No <span class="sort-icon"></span></th>
-                                    <th class="material-desc">Material Description <span class="sort-icon"></span></th>
-                                    <th class="status">Status <span class="sort-icon"></span></th>
-                                    <th class="qty">Qty <span class="sort-icon"></span></th>
-                                    <th class="supplement">Supplement <span class="sort-icon"></span></th>
-                                    <th class="total-qty">Total Qty <span class="sort-icon"></span></th>
-                                    <th class="lot">Lot <span class="sort-icon"></span></th>
-                                    <th class="date-needed">Date Needed <span class="sort-icon"></span></th>
-                                    <th class="date-filed">Date Filed <span class="sort-icon"></span></th>
-
+                                    <th class="material-no text-truncate" style="min-width:100px;">Material No</th>
+                                    <th class="material-desc text-truncate" style="min-width:150px;">Material Description</th>
+                                    <th class="status text-center" style="min-width:80px;">Status</th>
+                                    <th class="qty text-center" style="min-width:60px;">Qty</th>
+                                    <th class="supplement text-center" style="min-width:80px;">Supplement</th>
+                                    <th class="total-qty text-center" style="min-width:80px;">Total Qty</th>
+                                    <th class="lot text-center" style="min-width:80px;">Lot</th>
+                                    <th class="date-needed text-center" style="min-width:100px;">Date Needed</th>
+                                    <th class="date-filed text-center" style="min-width:100px;">Date Filed</th>
                                 </tr>
                             </thead>
                             <tbody id="data-body"></tbody>
                         </table>
                     </div>
 
-
-                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <div class="mt-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
                         <div></div> <!-- Empty placeholder for left alignment -->
 
                         <div id="pagination" class="d-flex justify-content-center"></div>
 
                         <div>
                             <button class="btn btn-danger btn-sm" onclick="openDeleteModal()">Multiple Delete</button>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -107,9 +100,6 @@
 
         let model = null;
         let currentPageData = [];
-
-
-
 
         function getData(model) {
 
@@ -165,7 +155,7 @@
 
                     paginator = createPaginator({
                         data: filteredData,
-                        rowsPerPage: 10,
+                        rowsPerPage: 15,
                         paginationContainerId: 'pagination',
                         renderPageCallback: renderPulledOutTable,
                         defaultSortFn: (a, b) => {
@@ -300,39 +290,6 @@
             border-bottom: 1px solid #ddd;
         }
 
-        /* Sticky first column: Material No */
-        .custom-hover th.material-no,
-        .custom-hover td.material-no {
-            position: sticky;
-            left: 0;
-            background: #fff;
-            z-index: 3;
-            min-width: 120px;
-            font-weight: 500;
-        }
-
-        /* Sticky second column: Material Description */
-        .custom-hover th.material-desc,
-        .custom-hover td.material-desc {
-            position: sticky;
-            left: 120px;
-            /* match width of first column */
-            background: #fff;
-            z-index: 2;
-            min-width: 220px;
-            border-right: 2px solid #ddd;
-
-            /* make description left-aligned for readability */
-            padding-left: 12px;
-        }
-
-        /* Keep table header on top */
-        .custom-hover th {
-            top: 0;
-            z-index: 4;
-
-        }
-
         /* Wrap long text in certain columns */
         .custom-hover td.material-desc,
         .custom-hover td.status,
@@ -341,9 +298,14 @@
             word-wrap: break-word;
         }
 
-        .custom-hover tbody tr:hover .material-no,
-        .custom-hover tbody tr:hover .material-desc {
-            background-color: #dde0e2 !important;
+        /* Hover effect on rows */
+        .custom-hover tbody tr:hover {
+            background-color: #dde0e2ff !important;
+        }
+
+        /* Optional: sort icon spacing */
+        .sort-icon {
+            margin-left: 4px;
         }
 
         /* Tablet-specific adjustments */
@@ -355,53 +317,5 @@
                 padding: 6px 4px;
             }
 
-            /* Adjust sticky offsets */
-            .custom-hover th.material-desc,
-            .custom-hover td.material-desc {
-                left: 120px;
-            }
-
-            /* Adjust widths for better tablet layout */
-            .material-no {
-                min-width: 100px;
-            }
-
-            .material-desc {
-                min-width: 180px;
-            }
-
-
-            .status {
-                width: 12%;
-            }
-
-            .qty,
-            .supplement,
-            .total-qty {
-                width: 10%;
-            }
-
-            .lot {
-                width: 8%;
-            }
-
-            .date-needed,
-            .date-filed {
-                width: 12%;
-            }
-
-            .actions {
-                width: 10%;
-            }
-        }
-
-        /* Hover effect */
-        .custom-hover tbody tr:hover {
-            background-color: #dde0e2ff !important;
-        }
-
-        /* Optional: sort icon spacing */
-        .sort-icon {
-            margin-left: 4px;
         }
     </style>

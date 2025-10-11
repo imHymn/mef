@@ -306,7 +306,7 @@ if ($role === 'administrator') {
       <!-- SKU Group -->
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#finishingSkuMenu" role="button" aria-expanded="false" aria-controls="finishingSkuMenu">
-          Assembly <i class="link-arrow" data-feather="chevron-down"></i>
+          SKU <i class="link-arrow" data-feather="chevron-down"></i>
         </a>
         <div class="collapse" id="finishingSkuMenu">
           <ul class="nav sub-menu" style="padding-left: 20px;">
@@ -323,7 +323,7 @@ if ($role === 'administrator') {
       <!-- Component Group -->
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#finishingComponentMenu" role="button" aria-expanded="false" aria-controls="finishingComponentMenu">
-          Stamping <i class="link-arrow" data-feather="chevron-down"></i>
+          Component <i class="link-arrow" data-feather="chevron-down"></i>
         </a>
         <div class="collapse" id="finishingComponentMenu">
           <ul class="nav sub-menu" style="padding-left: 20px;">
@@ -419,39 +419,7 @@ if ($role === 'administrator') {
     </ul>
   </div>
 </li>
-<li class="nav-item">
-  <a class="nav-link d-flex justify-content-between align-items-center" 
-     data-toggle="collapse" 
-     href="#skuMenu" 
-     role="button" 
-     aria-expanded="false" 
-     aria-controls="skuMenu">
-    
-    <i class="link-icon" data-feather="box"></i>
-    
-    <span class="link-title">Masterlist Data</span>
-    
-    <i class="link-arrow" data-feather="chevron-down"></i>
-  </a>
 
-  <div class="collapse" id="skuMenu">
-    <ul class="nav sub-menu">
-      <li class="nav-item">
-        <a href="?page_active=manage_sku" class="nav-link" data-page="manage_sku">
-          SKU Management
-        </a>
-      </li><li class="nav-item">
-        <a href="?page_active=manage_component" class="nav-link" data-page="manage_component">
-          Component Management
-        </a>
-      </li><li class="nav-item">
-        <a href="?page_active=manage_rm" class="nav-link" data-page="manage_rm">
-          Raw Material Management
-        </a>
-      </li>
-    </ul>
-  </div>
-</li>
 
 
 

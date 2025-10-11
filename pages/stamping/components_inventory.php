@@ -44,11 +44,11 @@
           <table class="custom-hover table" style="table-layout: fixed; width: 100%;">
             <thead>
               <tr>
-                <th style="width: 10%; text-align: center;">Material No <span class="sort-icon"></span></th>
-                <th style="width: 18%; text-align: center;">Component Name <span class="sort-icon"></span></th>
-                <th style="width: 3%; text-align: center;">Usage<span class="sort-icon"></span></th>
+                <th style="width: 5%; text-align: center;">Material No <span class="sort-icon"></span></th>
+                <th style="width: 10%; text-align: center;">Component Name <span class="sort-icon"></span></th>
+                <th style="width: 5%; text-align: center;">Usage<span class="sort-icon"></span></th>
                 <th style="width: 5%; text-align: center;">Quantity <span class="sort-icon"></span></th>
-                <th style="width: 7%; text-align: center;">Raw Material Qty <span class="sort-icon"></span></th>
+                <th style="width: 5%; text-align: center;white-space: normal; word-wrap: break-word;">Raw Material Qty <span class="sort-icon"></span></th>
                 <th style="width: 5%; text-align: center;">Stock Status <span class="sort-icon"></span></th>
                 <th style="width: 5%; text-align: center;">Issue<span class="sort-icon"></span></th>
               </tr>

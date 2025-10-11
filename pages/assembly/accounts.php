@@ -39,20 +39,22 @@
                         </div>
                     </div>
 
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm custom-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%;">Username <span class="sort-icon"></span></th>
+                                    <th style="width:15%;">Name <span class="sort-icon"></span></th>
+                                    <th style="width:10%;">Role <span class="sort-icon"></span></th>
+                                    <th style="width:10%;">Department <span class="sort-icon"></span></th>
+                                    <th style="width:10%;">Section <span class="sort-icon"></span></th>
+                                    <th style="width:5%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-body"></tbody>
+                        </table>
+                    </div>
 
-                    <table class="custom-hover table">
-                        <thead>
-                            <tr>
-                                <th class="col-md-2">Username <span class="sort-icon"></span></th>
-                                <th class="col-md-2">Name <span class="sort-icon"></span></th>
-                                <th class="col-md-2">Role <span class="sort-icon"></span></th>
-                                <th class="col-md-2">Department <span class="sort-icon"></span></th>
-                                <th class="col-md-2">Section <span class="sort-icon"></span></th>
-                                <th class="col-md-2">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-body"></tbody>
-                    </table>
                     <div id="pagination-controls" class="mt-2 text-center"></div>
                 </div>
             </div>
@@ -205,7 +207,7 @@
     <td>${highlightText(user.name ?? 'null', currentFilterQuery)}</td>
     <td>${highlightText(user.role ? user.role.toUpperCase() : 'null', currentFilterQuery)}</td>
     <td>${highlightText(production.toUpperCase(), currentFilterQuery)}</td>
-    <td>${highlightText(productionLocation ?  productionLocation : '', currentFilterQuery)}</td>
+    <td style="white-space: normal; word-wrap: break-word;">${highlightText(productionLocation ?  productionLocation : '', currentFilterQuery)}</td>
 <td>
   <!-- Update Button -->
   <button 
