@@ -103,6 +103,19 @@
     </div>
   </div>
 </div>
+<div class="table-responsive">
+  <table class="table table-hover table-sm" id="userSearchTable">
+    <thead class="table-dark">
+      <tr>
+        <th style="width:5%; text-align:center;">#</th>
+        <th style="width:45%; text-align:left;">Name</th>
+        <th style="width:25%; text-align:center;">Section</th>
+        <th style="width:25%; text-align:center;">Specific Section</th>
+      </tr>
+    </thead>
+    <tbody id="userSearchResults"></tbody>
+  </table>
+</div>
 
 <script>
   let userData = [];
@@ -134,18 +147,27 @@
           specific_section: cleanValue(u.specific_section) || '',
           role: (u.role || '').toLowerCase()
         }));
-
-      userData.forEach(u => uniqueSections.add(u.section));
       const sectionSelect = document.getElementById('sectionSelect');
-      [...uniqueSections]
-      .filter(section => section && section.trim() !== '')
-        .sort()
-        .forEach(section => {
-          const opt = document.createElement('option');
-          opt.value = section;
-          opt.textContent = section.toUpperCase();
-          sectionSelect.appendChild(opt);
-        });
+      const uniqueSpecificSections = new Set();
+
+      userData.forEach(u => {
+        if (u.specific_section && u.specific_section.trim() !== '') {
+          // Split by comma and trim each part
+          u.specific_section.split(',').forEach(part => {
+            const trimmed = part.trim();
+            if (trimmed !== '') uniqueSpecificSections.add(trimmed);
+          });
+        }
+      });
+
+      // Sort and render
+      [...uniqueSpecificSections].sort().forEach(specSection => {
+        const opt = document.createElement('option');
+        opt.value = specSection;
+        opt.textContent = specSection.toUpperCase();
+        sectionSelect.appendChild(opt);
+      });
+
 
       filteredUsers = [...userData];
       displayUserSearchResults(filteredUsers);
@@ -180,40 +202,35 @@
   document.getElementById('locationSelect').addEventListener('change', filterAndRenderUsers);
   document.getElementById('multiUserSearch').addEventListener('input', filterAndRenderUsers);
 
-
   function filterAndRenderUsers() {
-    const section = document.getElementById('sectionSelect').value;
-    const location = document.getElementById('locationSelect').value;
+    const selectedSpecificSection = document.getElementById('sectionSelect').value.toLowerCase();
+    const location = document.getElementById('locationSelect').value.toLowerCase();
     const query = document.getElementById('multiUserSearch').value.toLowerCase();
 
     filteredUsers = userData.filter(u => {
-      const matchesSection = !section || u.section === section;
-      const matchesLocation =
-        section !== 'stamping' || !location || u.specific_section === location;
+      // Split comma-separated specific_section
+      const specificSections = (u.specific_section || '').split(',').map(s => s.trim().toLowerCase());
 
-      const searchable = [
-          u.name,
-          u.user_id,
-          u.role,
-          u.section,
-          u.specific_section
-        ]
+      // Match selected specific_section
+      const matchesSpecificSection = !selectedSpecificSection || specificSections.includes(selectedSpecificSection);
+
+      // Match location (if needed)
+      const locations = (u.section || '').split(',').map(s => s.trim().toLowerCase()); // optional if location is separate
+      const matchesLocation = !location || locations.includes(location);
+
+      // Search by name/id/role etc.
+      const searchable = [u.name, u.user_id, u.role, u.section, u.specific_section]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
-
       const matchesSearch = !query || searchable.includes(query);
 
-      return matchesSection && matchesLocation && matchesSearch;
+      return matchesSpecificSection && matchesLocation && matchesSearch;
     });
-
-    // ✅ If nothing selected, show ALL users
-    if (!section && !location && !query) {
-      filteredUsers = [...userData];
-    }
 
     displayUserSearchResults(filteredUsers);
   }
+
 
   function displayUserSearchResults(users) {
     const resultContainer = document.getElementById('userSearchResults');
@@ -243,7 +260,7 @@
         location = Array.isArray(arr) ? arr.join(', ') : arr;
       } catch {}
 
-      li.textContent = `${user.name} - ${(section || '').toUpperCase()} - ${(location || '').toUpperCase()}`;
+      li.textContent = `${user.name}`;
       if (selectedIds.has(String(user.user_id))) {
         li.classList.add('bg-primary', 'text-white');
       }

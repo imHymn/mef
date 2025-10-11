@@ -60,6 +60,15 @@ if (!empty($_SESSION['specific_section'])) {
             padding: 0.8rem !important;
         }
 
+        .sidebar-body {
+            height: calc(100vh - 60px);
+            /* adjust 60px if you have a top navbar */
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            /* optional - Firefox */
+        }
+
         @media (min-width: 768px) {
             .swal-sm {
                 max-width: 400px !important;
@@ -94,6 +103,39 @@ if (!empty($_SESSION['specific_section'])) {
                 <ul class="nav">
                     <li class="nav-item nav-category">Main-Section</li>
                     <?php
+                    echo '<li class="nav-item">
+  <a class="nav-link d-flex justify-content-between align-items-center" 
+     data-toggle="collapse" 
+     href="#skuMenu" 
+     role="button" 
+     aria-expanded="false" 
+     aria-controls="skuMenu">
+    
+    <i class="link-icon" data-feather="box"></i>
+    
+    <span class="link-title">Masterlist Data</span>
+    
+    <i class="link-arrow" data-feather="chevron-down"></i>
+  </a>
+
+  <div class="collapse" id="skuMenu">
+    <ul class="nav sub-menu">
+      <li class="nav-item">
+        <a href="?page_active=manage_sku" class="nav-link" data-page="manage_sku">
+          SKU Management
+        </a>
+      </li><li class="nav-item">
+        <a href="?page_active=manage_component" class="nav-link" data-page="manage_component">
+          Component Management
+        </a>
+      </li><li class="nav-item">
+        <a href="?page_active=manage_rm" class="nav-link" data-page="manage_rm">
+          Raw Material Management
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>';
                     $roleFileMap = [
                         'administrator' => 'administrator.php',
                         'account manager' => 'general.php',

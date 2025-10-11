@@ -14,22 +14,36 @@
 
                     <input type="text" class="form-control" id="id" hidden>
 
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label>Material No</label>
                         <input type="text" class="form-control" id="editMaterialNo" readonly>
                     </div>
-                    <div class="form-group col-md-5">
+
+                    <div class="form-group col-md-4">
                         <label>Material Description</label>
                         <input type="text" class="form-control" id="editMaterialDesc" readonly>
                     </div>
-                    <div class="form-group col-md-3">
+
+                    <div class="form-group col-md-2">
                         <label>Quantity</label>
                         <input type="number" class="form-control" id="editQuantity">
                     </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Fuel Type</label>
+                        <select class="form-control" id="editFuelType">
+                            <option value="">Select Fuel Type</option>
+                            <option value="GAS">Gasoline</option>
+                            <option value="DIESEL">Diesel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-2 ml-3">
+                        <label>SKU from Stamping</label><br>
+                        <input class="form-check-input ml-5" type="checkbox" id="isStampingSKU">
+                    </div>
                 </div>
-
                 <hr>
-
                 <div class="mb-2 text-right">
                     <button type="button" class="btn btn-sm btn-success" id="addAssemblyRowBtn">
                         Add Process
@@ -60,7 +74,22 @@
     </div>
 </div>
 <script>
-    (function() {
+    (function() { // Helper to normalize empty values
+        function normalizeValue(val) {
+            if (val === '' || val === undefined || val === null) return null;
+            if (Array.isArray(val) && val.length === 0) return null;
+            return val;
+        }
+
+        function safeParse(json) {
+            if (!json || json === 'null' || json === '[]') return [];
+            try {
+                const parsed = JSON.parse(json);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
         // ensure global functions (so parent can call them regardless of include order)
         window.closeEditSkuModal = function() {
             $('#editSkuModal').modal('hide');
@@ -72,26 +101,33 @@
             btn.addEventListener('click', window.closeEditSkuModal);
         });
 
-        // open modal and populate fields
         window.openEditModal = function(item) {
+            console.log(item);
             try {
                 // basic fields
                 const elMaterialNo = document.getElementById('editMaterialNo');
                 const elMaterialDesc = document.getElementById('editMaterialDesc');
                 const elQuantity = document.getElementById('editQuantity');
+                const elFuelType = document.getElementById('editFuelType'); // ✅ added
                 const elId = document.getElementById('id');
+
+                // check if this SKU is from stamping
+                const isStampingCheckbox = document.getElementById('isStampingSKU');
+                if (isStampingCheckbox) {
+                    isStampingCheckbox.checked = item.process && item.process.toLowerCase() === 'stamping';
+                }
 
                 if (elMaterialNo) elMaterialNo.value = item.material_no || '';
                 if (elMaterialDesc) elMaterialDesc.value = item.material_description || '';
                 if (elQuantity) elQuantity.value = item.quantity || '';
+                if (elFuelType) elFuelType.value = item.fuel_type || ''; // ✅ added
                 if (elId) elId.value = item.id || '';
 
-                // parse arrays safely
-                const subComponents = item.sub_component ? JSON.parse(item.sub_component) : [];
-                const assemblySections = item.assembly_section ? JSON.parse(item.assembly_section) : [];
-                const assemblyProcesses = item.assembly_process ? JSON.parse(item.assembly_process) : [];
-                const processTimes = item.assembly_processtime ? JSON.parse(item.assembly_processtime) : [];
-                const manpower = item.manpower ? JSON.parse(item.manpower) : [];
+                const subComponents = safeParse(item.sub_component);
+                const assemblySections = safeParse(item.assembly_section);
+                const assemblyProcesses = safeParse(item.assembly_process);
+                const processTimes = safeParse(item.assembly_processtime);
+                const manpower = safeParse(item.manpower);
 
                 const tbody = document.querySelector('#editAssemblyTable tbody');
                 if (!tbody) return console.warn('editAssemblyTable tbody not found');
@@ -100,26 +136,25 @@
                 for (let i = 0; i < Math.max(subComponents.length, assemblyProcesses.length, assemblySections.length, processTimes.length, manpower.length); i++) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                    <td>${i + 1}</td>
-                    <td><input type="text" class="form-control form-control-sm" value="${subComponents[i] || ''}"></td>
-                    <td><input type="text" class="form-control form-control-sm" value="${assemblyProcesses[i] || ''}"></td>
-                    <td><input type="text" class="form-control form-control-sm" value="${assemblySections[i] || ''}"></td>
-                    <td><input type="number" class="form-control form-control-sm" value="${processTimes[i] || 0}"></td>
-                    <td><input type="number" class="form-control form-control-sm" value="${manpower[i] || 0}"></td>
-                    <td><button type="button" class="btn btn-sm btn-danger remove-row-btn">Remove</button></td>
-                `;
+                <td>${i + 1}</td>
+                <td><input type="text" class="form-control form-control-sm" value="${subComponents[i] || ''}"></td>
+                <td><input type="text" class="form-control form-control-sm" value="${assemblyProcesses[i] || ''}"></td>
+                <td><input type="text" class="form-control form-control-sm" value="${assemblySections[i] || ''}"></td>
+                <td><input type="number" class="form-control form-control-sm" value="${processTimes[i] || 0}"></td>
+                <td><input type="number" class="form-control form-control-sm" value="${manpower[i] || 0}"></td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-row-btn">Remove</button></td>
+            `;
                     tbody.appendChild(tr);
                 }
+
                 updateRowNumbers();
                 $('#editSkuModal').modal('show');
             } catch (err) {
                 console.error('openEditModal error:', err);
             }
             makeRowsDraggable();
-
         };
 
-        // add row (guarded)
         const addBtn = document.getElementById('addAssemblyRowBtn');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
@@ -162,8 +197,6 @@
                 row.cells[0].textContent = index + 1;
             });
         }
-
-        /* ========== DRAG & DROP SORTING ========== */
         let draggedRow = null;
 
         const tbody = document.querySelector('#editAssemblyTable tbody');
@@ -201,37 +234,42 @@
             rows.forEach(row => row.setAttribute('draggable', 'true'));
         }
 
-        // call this after you build or modify rows
-
-        // Save (guarded)
         const saveBtn = document.getElementById('saveEditSkuBtn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
                 try {
-                    const updatedItem = {
-                        id: document.getElementById('id') ? document.getElementById('id').value : '',
-                        material_no: document.getElementById('editMaterialNo') ? document.getElementById('editMaterialNo').value : '',
-                        material_description: document.getElementById('editMaterialDesc') ? document.getElementById('editMaterialDesc').value : '',
-                        quantity: document.getElementById('editQuantity') ? document.getElementById('editQuantity').value : '',
-                        total_process: 0,
-                        sub_component: [],
-                        assembly_section: [],
-                        assembly_process: [],
-                        assembly_processtime: [],
-                        manpower: []
-                    };
-
                     const rows = document.querySelectorAll('#editAssemblyTable tbody tr');
+
+                    // Initialize arrays
+                    const sub_component = [];
+                    const assembly_process = [];
+                    const assembly_section = [];
+                    const assembly_processtime = [];
+                    const manpower = [];
+
                     rows.forEach(row => {
                         const inputs = row.querySelectorAll('input');
-                        updatedItem.sub_component.push(inputs[0] ? inputs[0].value.trim() : '');
-                        updatedItem.assembly_process.push(inputs[1] ? inputs[1].value.trim() : '');
-                        updatedItem.assembly_section.push(inputs[2] ? inputs[2].value.trim() : '');
-                        updatedItem.assembly_processtime.push(Number(inputs[3] ? inputs[3].value : 0));
-                        updatedItem.manpower.push(Number(inputs[4] ? inputs[4].value : 0));
+                        sub_component.push(inputs[0]?.value.trim() || '');
+                        assembly_process.push(inputs[1]?.value.trim() || '');
+                        assembly_section.push(inputs[2]?.value.trim() || '');
+                        assembly_processtime.push(Number(inputs[3]?.value || 0));
+                        manpower.push(Number(inputs[4]?.value || 0));
                     });
 
-                    updatedItem.total_process = rows.length;
+                    const updatedItem = {
+                        id: normalizeValue(document.getElementById('id')?.value),
+                        material_no: normalizeValue(document.getElementById('editMaterialNo')?.value),
+                        material_description: normalizeValue(document.getElementById('editMaterialDesc')?.value),
+                        quantity: normalizeValue(document.getElementById('editQuantity')?.value),
+                        fuel_type: normalizeValue(document.getElementById('editFuelType')?.value), // ✅ added
+                        total_process: rows.length,
+                        sub_component: normalizeValue(sub_component),
+                        assembly_section: normalizeValue(assembly_section),
+                        assembly_process: normalizeValue(assembly_process),
+                        assembly_processtime: normalizeValue(assembly_processtime),
+                        manpower: normalizeValue(manpower),
+                        process: document.getElementById('isStampingSKU').checked ? 'stamping' : null
+                    };
 
                     fetch('api/masterlist/updateSKU', {
                             method: 'POST',
@@ -258,6 +296,7 @@
                 }
             });
         }
+
         makeRowsDraggable();
 
     })();

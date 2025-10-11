@@ -47,6 +47,7 @@ class DatabaseClass
         $stmt = $this->executeStatement($sql, $params);
         return $stmt->rowCount();
     }
+
     private function executeStatement($sql, $params = [])
     {
         $stmt = $this->connection->prepare($sql);

@@ -11,12 +11,12 @@
 
                 <!-- Basic Fields -->
                 <div class="form-row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col-md-2">
                         <label>Material No</label>
                         <input type="text" class="form-control" id="addMaterialNo">
                     </div>
 
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         <label>Material Description</label>
                         <input type="text" class="form-control" id="addMaterialDesc">
                     </div>
@@ -25,7 +25,14 @@
                         <label>Quantity</label>
                         <input type="number" class="form-control" id="addQuantity" value="0">
                     </div>
-
+                    <div class="form-group col-md-2">
+                        <label>Fuel Type</label>
+                        <select class="form-control" id="addSkuFuelType">
+                            <option value="">Select Fuel Type</option>
+                            <option value="GAS">Gasoline</option>
+                            <option value="DIESEL">Diesel</option>
+                        </select>
+                    </div>
                     <div class="form-group col-md-3 d-flex flex-column justify-content-center align-items-center">
                         <label class="mb-1">Directly from Stamping</label>
                         <div class="form-check">
@@ -188,7 +195,8 @@
                         material_no: document.getElementById('addMaterialNo').value.trim(),
                         material_description: document.getElementById('addMaterialDesc').value.trim(),
                         quantity: Number(document.getElementById('addQuantity').value) || 0,
-                        stamping: fromStamping,
+                        fuel_type: document.getElementById('addSkuFuelType').value.trim() || '',
+                        process: fromStamping,
                         total_process: 0,
                         sub_component: [],
                         assembly_section: [],

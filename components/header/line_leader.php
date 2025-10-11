@@ -115,7 +115,7 @@ if ($role === 'line leader' && in_array('finishing', $section, true)) {
 <li class="nav-item">
   <a class="nav-link" data-toggle="collapse" href="#finishingAssemblyMenu" role="button" aria-expanded="false" aria-controls="finishingAssemblyMenu">
     <i class="link-icon" data-feather="tool"></i>
-    <span class="link-title">Finishing Assembly</span>
+    <span class="link-title">Finishing SKU</span>
     <i class="link-arrow" data-feather="chevron-down"></i>
   </a>
   <div class="collapse" id="finishingAssemblyMenu">
@@ -138,7 +138,7 @@ if ($role === 'line leader' && in_array('finishing', $section, true)) {
 <li class="nav-item">
   <a class="nav-link" data-toggle="collapse" href="#finishingStampingMenu" role="button" aria-expanded="false" aria-controls="finishingStampingMenu">
     <i class="link-icon" data-feather="layers"></i>
-    <span class="link-title">Finishing Stamping</span>
+    <span class="link-title">Finishing Component</span>
     <i class="link-arrow" data-feather="chevron-down"></i>
   </a>
   <div class="collapse" id="finishingStampingMenu">

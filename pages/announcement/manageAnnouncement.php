@@ -28,57 +28,55 @@
             <li class="breadcrumb-item" aria-current="page">Announcement</li>
         </ol>
     </nav>
-    <div class="row ">
-        <div class="col-md-12 grid-margin stretch-card">
+
+    <div class="row mt-3">
+        <div class="col-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center ">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
                         <h6 class="card-title mb-0">Announcement List</h6>
-                        <div>
-                            <button id="openCreateModalBtn" class="btn btn-primary mb-3">
-                                Create Announcement
-                            </button>
+                        <button id="openCreateModalBtn" class="btn btn-primary mb-2">
+                            Create Announcement
+                        </button>
+                    </div>
 
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4">
+                            <input
+                                type="text"
+                                id="filter-input"
+                                class="form-control"
+                                placeholder="Type to filter..." />
                         </div>
                     </div>
 
-                    <div class="row mb-3 col-md-3">
-
-                        <input
-                            type="text"
-                            id="filter-input"
-                            class="form-control"
-                            placeholder="Type to filter..." />
-
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm custom-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">Title <span class="sort-icon"></span></th>
+                                    <th style="width: 15%;">Message <span class="sort-icon"></span></th>
+                                    <th style="width: 5%;">Category <span class="sort-icon"></span></th>
+                                    <th style="width: 5%;">Priority <span class="sort-icon"></span></th>
+                                    <th style="width: 5%;">Status <span class="sort-icon"></span></th>
+                                    <th style="width: 5%;">Reason</th>
+                                    <th style="width: 5%;">Created At <span class="sort-icon"></span></th>
+                                    <th style="width: 5%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="announcement-body"></tbody>
+                        </table>
                     </div>
 
-                    <table class="custom-hover table">
-                        <thead>
-                            <tr style="text-align:center;">
-
-                                <th style="width: 15%;">Title <span class="sort-icon"></span></th>
-                                <th style="width: 15%;">Message <span class="sort-icon"></span></th>
-                                <th style="width: 10%;">Category <span class="sort-icon"></span></th>
-                                <th style="width: 10%;">Priority <span class="sort-icon"></span></th>
-                                <th style="width: 10%;">Status <span class="sort-icon"></span></th>
-                                <th style="width: 10%;">Created At <span class="sort-icon"></span></th>
-                                <th style="width: 5%;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="announcement-body"></tbody>
-                    </table>
-
                     <div id="pagination-controls" class="mt-2 text-center"></div>
-
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    </form>
-</div>
-</div>
-</div>
+
+
 <script>
     const openCreateModalBtn = document.getElementById("openCreateModalBtn");
     openCreateModalBtn.addEventListener("click", () => showModal(createModal));
@@ -96,13 +94,14 @@
             })
             .then(data => {
                 tbody.innerHTML = data.map(item => `
-                    <tr>
+                    <tr >
                         <td>${item.title || '-'}</td>
                         <td>${item.message || '-'}</td>
                         <td>${item.category || '-'}</td>
                         <td>${item.priority || '-'}</td>
                         <td>${item.status || '-'}</td>
-                        <td>${item.created_at || '-'}</td>
+                         <td>${item.status === 'Cancelled' ? item.reason : '<i>NONE</i>'}</td><td>${item.created_at || '-'}</td>        
+                       
                         <td>
                           <button 
                             class="btn btn-sm btn-primary btn-edit" 

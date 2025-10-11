@@ -70,7 +70,6 @@ class AnnouncementController
             ]);
         }
     }
-
     public function updateAnnouncement()
     {
         global $input;
@@ -82,8 +81,10 @@ class AnnouncementController
         $status = trim($input['status'] ?? '');
         $start_date = trim($input['start_date'] ?? '');
         $end_date = trim($input['end_date'] ?? '');
+        $cancel_reason = trim($input['cancel_reason'] ?? '');
         $updated_at = date('Y-m-d H:i:s');
 
+        // Basic validation
         if ($id <= 0 || empty($title) || empty($message) || empty($category) || empty($priority) || empty($status) || empty($start_date) || empty($end_date)) {
             echo json_encode([
                 'success' => false,
@@ -100,6 +101,15 @@ class AnnouncementController
             return;
         }
 
+        // Require cancel reason if status is Cancelled
+        if ($status === 'Cancelled' && empty($cancel_reason)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Please provide a reason for cancellation.'
+            ]);
+            return;
+        }
+
         try {
             // Call the model function to update the record
             $this->announcementModel->updateAnnouncement(
@@ -111,7 +121,8 @@ class AnnouncementController
                 $status,
                 $start_date,
                 $end_date,
-                $updated_at
+                $updated_at,
+                $cancel_reason
             );
 
             echo json_encode([
@@ -125,6 +136,7 @@ class AnnouncementController
             ]);
         }
     }
+
 
     public function deleteAnnouncement()
     {

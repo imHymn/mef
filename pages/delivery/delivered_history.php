@@ -24,76 +24,6 @@
         padding: 8px 6px;
         vertical-align: middle;
     }
-
-    /* Tablet-specific adjustments */
-    @media (max-width: 991.98px) {
-
-        .custom-hover th,
-        .custom-hover td {
-            font-size: 13px;
-            padding: 5px 4px;
-            white-space: normal;
-            /* allow text wrap */
-            word-wrap: break-word;
-        }
-
-        /* Adjust column widths proportionally */
-        .custom-hover th:nth-child(1),
-        .custom-hover td:nth-child(1) {
-            width: 15%;
-        }
-
-        /* Material No */
-
-        .custom-hover th:nth-child(2),
-        .custom-hover td:nth-child(2) {
-            width: 25%;
-        }
-
-        /* Material Description */
-
-        .custom-hover th:nth-child(3),
-        .custom-hover td:nth-child(3) {
-            width: 10%;
-        }
-
-        /* Total Qty */
-
-        .custom-hover th:nth-child(4),
-        .custom-hover td:nth-child(4) {
-            width: 10%;
-        }
-
-        /* Lot */
-
-        .custom-hover th:nth-child(5),
-        .custom-hover td:nth-child(5) {
-            width: 12%;
-        }
-
-        /* Date Needed */
-
-        .custom-hover th:nth-child(6),
-        .custom-hover td:nth-child(6) {
-            width: 12%;
-        }
-
-        /* Date Loaded */
-
-        .custom-hover th:nth-child(7),
-        .custom-hover td:nth-child(7) {
-            width: 12%;
-        }
-
-        /* Truck */
-
-        .custom-hover th:nth-child(8),
-        .custom-hover td:nth-child(8) {
-            width: 14%;
-        }
-
-        /* Status */
-    }
 </style>
 
 <div class="page-content">
@@ -271,7 +201,7 @@
             <td style="text-align: center;">${highlightText(item.total_quantity?.toString() ?? '', currentFilterQuery)}</td>
             <td style="text-align: center;">${highlightText(item.lot_no ?? '<i>NONE</i>', currentFilterQuery)}</td>
             <td style="text-align: center;">${highlightText(item.date_needed || '<i>NONE</i>', currentFilterQuery)}</td>
-            <td style="text-align: center;">${highlightText(item.date_loaded || '<i>NONE</i>', currentFilterQuery)}</td>
+            <td style="text-align: center;white-space: normal; word-wrap: break-word;">${highlightText(item.date_loaded || '<i>NONE</i>', currentFilterQuery)}</td>
             <td style="text-align: center;">${highlightText(item.truck || '<i>NONE</i>', currentFilterQuery)}</td>
             <td style="text-align: center;">
                 <span class="btn btn-sm btn-primary" tabindex="-1" role="button" aria-disabled="true">

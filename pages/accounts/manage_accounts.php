@@ -28,46 +28,47 @@
             <li class="breadcrumb-item" aria-current="page">Accounts</li>
         </ol>
     </nav>
+
     <div class="row mt-3">
-        <div class="col-md-12 grid-margin stretch-card">
+        <div class="col-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                         <h6 class="card-title mb-0">Account List</h6>
-                        <div>
+                        <div class="mt-2 mt-sm-0">
                             <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createAccountModal">
                                 Create Account
                             </button>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateQR">
                                 Generate QR Code
                             </button>
-
                         </div>
                     </div>
 
-                    <div class="row mb-3 col-md-3">
-
+                    <div class="row mb-3 col-md-3 col-12">
                         <input
                             type="text"
                             id="filter-input"
                             class="form-control"
                             placeholder="Type to filter..." />
-
                     </div>
 
-                    <table class="custom-hover table">
-                        <thead>
-                            <tr>
-                                <th style="width: 15%;">Username <span class="sort-icon"></span></th>
-                                <th style="width: 20%;">Name <span class="sort-icon"></span></th>
-                                <th style="width: 15%;">Role <span class="sort-icon"></span></th>
-                                <th style="width: 20%;">Department <span class="sort-icon"></span></th>
-                                <th style="width: 20%;">Section <span class="sort-icon"></span></th>
-                                <th style="width: 10%;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-body"></tbody>
-                    </table>
+                    <!-- Responsive Table Wrapper -->
+                    <div class="table-responsive">
+                        <table class="custom-hover table  table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 15%;">Username <span class="sort-icon"></span></th>
+                                    <th style="width: 20%;">Name <span class="sort-icon"></span></th>
+                                    <th style="width: 15%;">Role <span class="sort-icon"></span></th>
+                                    <th style="width: 20%;">Department <span class="sort-icon"></span></th>
+                                    <th style="width: 20%;">Section <span class="sort-icon"></span></th>
+                                    <th style="width: 10%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-body"></tbody>
+                        </table>
+                    </div>
 
                     <div id="pagination-controls" class="mt-2 text-center"></div>
 
@@ -75,9 +76,8 @@
             </div>
         </div>
     </div>
-
-    </form>
 </div>
+
 </div>
 </div>
 <link href="assets/css/all.min.css" rel="stylesheet">

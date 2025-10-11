@@ -305,9 +305,15 @@
           ? item.sub_component.replace(/"/g, '')
           : '<i>NONE</i>', currentFilterQuery)}
   </td>
-  <td style="text-align: center; white-space: normal; word-wrap: break-word;">
-      ${highlightText(item.assembly_process ? item.assembly_process.replace(/"/g, '') : '<i>NONE</i>', currentFilterQuery)}
-  </td>
+ <td style="text-align: center; white-space: normal; word-wrap: break-word;">
+    ${highlightText(
+        item.assembly_process 
+            ? `${item.assembly_process.replace(/"/g, '')} (${item.process_no ?? '-'})` 
+            : `<i>NONE</i>`, 
+        currentFilterQuery
+    )}
+</td>
+
   <td style="text-align: center;">
       ${highlightText(item.lot_no ? `${item.variant} - ${item.lot_no}` : '<i>NONE</i>', currentFilterQuery)}
   </td>

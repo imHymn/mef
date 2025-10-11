@@ -64,6 +64,11 @@
                     <label for="edit_end_date">End Date</label>
                     <input type="date" class="form-control" id="edit_end_date" name="end_date" required>
                 </div>
+                <div class="form-group mb-3 d-none" id="cancelReasonWrapper">
+                    <label for="cancel_reason">Reason for Cancellation</label>
+                    <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="2" placeholder="Enter reason for cancellation..."></textarea>
+                </div>
+
             </div>
             <!-- Start Date -->
 
@@ -89,6 +94,8 @@
 
     // Reusable close function
     function closeEditModal() {
+        const reasonWrapper = document.getElementById("cancelReasonWrapper");
+        reasonWrapper.classList.remove("d-none");
         const modalElement = document.getElementById("editAnnouncementModal");
         modalElement.classList.remove("show");
         modalElement.style.display = "none";
@@ -98,14 +105,27 @@
         document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
 
         // Optional: clear fields
-        ["announcement_id", "edit_title", "edit_message", "edit_category", "edit_priority", "edit_status", "edit_start_date", "edit_end_date"].forEach(id => {
+        ["announcement_id", "edit_title", "edit_message", "edit_category", "edit_priority", "edit_status", "edit_start_date", "edit_end_date", "cancel_reason"].forEach(id => {
             document.getElementById(id).value = '';
         });
+
+        // Hide cancel reason wrapper
+        document.getElementById("cancelReasonWrapper").classList.add("d-none");
     }
 
 
     function updateStatusOptions(category, currentStatus = null) {
         const statusSelect = document.getElementById("edit_status");
+        const cancelReasonWrapper = document.getElementById("cancelReasonWrapper");
+
+        statusSelect.addEventListener("change", () => {
+            if (statusSelect.value === "Cancelled") {
+                cancelReasonWrapper.classList.remove("d-none");
+            } else {
+                cancelReasonWrapper.classList.add("d-none");
+                document.getElementById("cancel_reason").value = '';
+            }
+        });
 
         const defaultStatuses = [{
                 value: "Active",
@@ -195,7 +215,14 @@
             start_date: document.getElementById("edit_start_date").value,
             end_date: document.getElementById("edit_end_date").value
         };
-
+        if (data.status === "Cancelled") {
+            const cancelReason = document.getElementById("cancel_reason").value.trim();
+            if (!cancelReason) {
+                showAlert("warning", "Required", "Please provide a reason for cancellation.");
+                return; // Stop updating
+            }
+            data.cancel_reason = cancelReason; // include reason in the request
+        }
         // Optional validation
         if (new Date(data.end_date) < new Date(data.start_date)) {
             showAlert("error", "Error", "End date cannot be before start date.");
