@@ -183,11 +183,24 @@
                     itemDiv.addEventListener("mouseover", () => itemDiv.style.transform = "scale(1.02)");
                     itemDiv.addEventListener("mouseout", () => itemDiv.style.transform = "scale(1)");
 
+                    // Title
                     const title = document.createElement("h5");
                     title.textContent = item.title || "No title";
-                    title.className = "fw-bold mb-2";
+                    title.className = "fw-bold mb-2 d-flex justify-content-between align-items-center";
+
+                    // Status badge
+                    const badge = document.createElement("span");
+                    badge.className = "badge";
+                    badge.style.marginLeft = "10px";
+
+                    if (item.status === "Cancelled") {
+                        badge.classList.add("bg-danger"); // red badge
+                        badge.textContent = "Cancelled";
+                    }
+                    title.appendChild(badge);
                     itemDiv.appendChild(title);
 
+                    // Message
                     if (item.message) {
                         const msg = document.createElement("p");
                         msg.style.margin = "0";
@@ -199,8 +212,17 @@
                         itemDiv.appendChild(msg);
                     }
 
+                    // Show cancel reason if status is Cancelled
+                    if (item.status === "Cancelled" && item.reason) {
+                        const reasonDiv = document.createElement("div");
+                        reasonDiv.className = "mt-2";
+                        reasonDiv.innerHTML = `<strong>Reason:</strong> ${item.reason}`;
+                        itemDiv.appendChild(reasonDiv);
+                    }
+
                     tabPane.appendChild(itemDiv);
                 });
+
 
                 tabContent.appendChild(tabPane);
             });

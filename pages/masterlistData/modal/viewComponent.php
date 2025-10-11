@@ -68,27 +68,48 @@
                 tbody.innerHTML = '';
 
                 const stageData = parseJSONSafe(item.stage_name);
-                if (!stageData.length) return;
+                if (Array.isArray(stageData) && stageData.length) {
+                    let rowIndex = 1;
 
-                let rowIndex = 1;
-                stageData.forEach(sectionData => {
-                    const section = sectionData.section || 'N/A';
-                    const stages = sectionData.stages || {};
+                    stageData.forEach(sectionData => {
+                        const section = sectionData?.section || 'N/A';
+                        const stages = sectionData?.stages || {};
 
-                    Object.entries(stages).forEach(([stageName, info]) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-        <td>${rowIndex++}</td>
-        <td>${section}</td>
-        <td>${stageName}</td>
-        <td>${info.cycle || 0}</td>
-        <td>${info.machine || ''}</td>
-        <td>${info.manpower ?? ''}</td> <!-- ✅ Added manpower column -->
-    `;
-                        tbody.appendChild(tr);
+                        if (stages && typeof stages === 'object' && Object.keys(stages).length) {
+                            Object.entries(stages).forEach(([stageName, info]) => {
+                                if (!info) info = {}; // fallback if info is null/undefined
+
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                    <td>${rowIndex++}</td>
+                    <td>${section}</td>
+                    <td>${stageName || 'N/A'}</td>
+                    <td>${info.cycle ?? 0}</td>
+                    <td>${info.machine || 'N/A'}</td>
+                    <td>${info.manpower ?? 'N/A'}</td>
+                `;
+                                tbody.appendChild(tr);
+                            });
+                        } else {
+                            // If no stages, show a placeholder row
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                <td>${rowIndex++}</td>
+                <td>${section}</td>
+                <td colspan="4" class="text-center">No stages available</td>
+            `;
+                            tbody.appendChild(tr);
+                        }
                     });
+                } else {
+                    // If stageData is empty
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+        <td colspan="6" class="text-center">No stage data available</td>
+    `;
+                    tbody.appendChild(tr);
+                }
 
-                });
 
                 $('#viewComponentModal').modal('show');
             } catch (err) {

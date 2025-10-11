@@ -53,6 +53,7 @@
                                     <th style="width:20%; text-align:center;">Component Name</th>
                                     <th style="width:10%; text-align:center;">Quantity</th>
                                     <th style="width:5%; text-align:center;">Usage</th>
+                                    <th style="width:5%; text-align:center;">Status</th>
                                     <th style="width:15%; text-align:center;">Action</th>
                                 </tr>
                             </thead>
@@ -125,7 +126,8 @@
                             'material_no',
                             'components_name',
                             'parsed_stages',
-                            'actual_inventory'
+                            'actual_inventory',
+                            'process',
                         ],
                         onFilter: (filtered, query) => paginator.setData(filtered)
                     });
@@ -155,6 +157,7 @@
       </td>
       <td style="text-align:center;">${item.actual_inventory ?? 0}</td>
       <td style="text-align:center;">${item.usage_type ?? 0}</td>
+  <td style="text-align:center;">${(item.process ?? 'NONE').toUpperCase()}</td>
       <td style="text-align:center;">
         <button class="btn btn-sm btn-info view-btn" data-item='${itemJson}'>View</button>
         <button class="btn btn-sm btn-primary edit-btn" data-item='${itemJson}' ${disabledAttr}>Edit</button>
